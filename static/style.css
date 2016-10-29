@@ -16,3 +16,181 @@ h2              { font-size: 1.2em; }
 .flash          { background: #cee5F5; padding: 0.5em;
                   border: 1px solid #aacbe2; }
 .error          { background: #f0d6d6; padding: 0.5em; }
+@import url(http://fonts.googleapis.com/css?family=Dosis:regular,bold);
+@import url(http://fonts.googleapis.com/css?family=Raleway:regular,bold);
+
+/* Generic CSS */
+a {
+    color: #CCFFCC;
+}
+body {
+    font-family: Dosis, sans-serif;
+}
+
+input {
+    font-family: Dosis;
+    font-size: 25px;
+    margin-right: 5px;
+    border-radius: 6px;
+
+}
+
+/* Navigation Bar CSS */
+
+.nav {
+	float:right
+    width: 50%;
+    background-color: #CCFFCC;
+    height: 48px;
+    text-align: center;
+    display: table;
+    box-shadow: 1px 1px 1px #888888;
+}
+
+.nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+.nav li {
+    float: right;
+}
+
+.nav li a {
+    display: block;
+    color: #CCFFCC;
+    text-align: center;
+    padding: 14px 50px;
+    text-decoration: none;
+}
+
+.nav li a:hover {
+    background-color: #111;
+}
+
+
+.nav .dropbtn {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.nav li .dropdown:hover .dropbtn {
+    background-color: red;
+}
+
+.nav li.dropdown {
+    display: inline-block;
+}
+
+.nav .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.nav .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.nav .dropdown-content a:hover {background-color: #f1f1f1}
+
+.nav .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.navMidHeader {
+    font-size: 30px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+
+/* Login Pages CSS */
+.loginImage {
+    float: left;
+    width: 50%;
+    height: 400px;
+    display: table;
+}
+
+.dogImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 400px;
+    min-height: 500px;
+}
+
+.titlelookandfeel h1{
+font-family: Raleway;
+
+	font-size: 54px;
+	color:#FFA500;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: 500;
+	line-height: 26.4px;}
+
+.loginInfo {
+    float: right;
+    width: 50%;
+    height: 500px;
+    /* background-color: lightblue; */
+    display: table;
+}
+
+.loginForm {
+    font-size: 25px;
+    padding-top: 20px;
+    padding-left: 100px;
+}
+
+.title{
+display:inline-block
+}
+.submission {
+    font-size: 25px;
+    font-family: Dosis;
+    -webkit-box-shadow: none;
+    /* TODO: Remove Shadow. */
+    box-shadow: none;
+    background-color: #CCFFCC;
+    border-radius: 6px;
+}
+
+.logout {
+    font-size: 25px;
+    font-family: Dosis;
+    -webkit-box-shadow: none;
+    /* TODO: Remove Shadow. */
+    box-shadow: none;
+    background-color: #CCFFCC;
+    border-radius: 6px;
+    position: absolute;
+    right: 10px;
+}
+
+/* User Profile CSS */
+#userBasicInfo {
+    border: 5px solid black;
+    float: left;
+    width: 20%;
+}
+
+#userStockTable {
+    border: 5px solid lightgray;
+    float: right;
+    width: 75%;
+}

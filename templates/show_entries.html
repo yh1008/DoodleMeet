@@ -1,21 +1,62 @@
-{% extends "layout.html" %}
-{% block body %}
-  {% if session.logged_in %}
-    <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
-      <dl>
-        <dt>Title:
-        <dd><input type=text size=30 name=title>
-        <dt>Text:
-        <dd><textarea name=text rows=5 cols=40></textarea>
-        <dd><input type=submit value=Share>
-      </dl>
-    </form>
-  {% endif %}
-  <ul class=entries>
-  {% for entry in entries %}
-    <li><h2>{{ entry.title }}</h2>{{ entry.text|safe }}
-  {% else %}
-    <li><em>Get Ready to make the best of buddies!</em>
-  {% endfor %}
-  </ul>
-{% endblock %}
+<head>
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
+<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Raleway" >
+
+</head>
+<body>
+    {% block navbar %}
+   <div class="title"> <div class="nav">
+        <ul>
+	  <li class="dropdown">
+            <a href="#" class="dropbtn">Adventure</a>
+		<div class="dropdown-content">
+		      <a href="#">Hiking</a>
+		      <a href="#">Sailing</a>
+		      <a href="#">Fishing</a>
+		      <a href="#">Skiing</a>
+	        	<a href="#">Rock Climbing</a>
+		      <a href="#">Horse Riding</a>
+		      <a href="#">Hunting</a>
+		      <a href="#">Rafting</a>
+		    </div>
+	  <li class="dropdown">
+            <a href="#" class="dropbtn">Entertainment</a>
+		<div class="dropdown-content">
+		      <a href="#">Movies</a>
+		      <a href="#">Restaurants</a>
+		      <a href="#">Shopping</a>
+		      <a href="#">Zoo</a>
+		    </div></li>
+	  <li class="dropdown">
+            <a href="#" class="dropbtn">Sports</a>
+		<div class="dropdown-content">
+		      <a href="#">Soccer</a>
+		      <a href="#">Baseball</a>
+		      <a href="#">Football</a>
+		      <a href="#">Swimming</a>
+		      <a href="#">Gym</a>
+		      <a href="#">Golf</a>
+		      <a href="#">Archery</a>
+		      <a href="#">Cycling</a>
+		      <a href="#">Boxing</a>
+		    </div></li>
+		</li>
+        </ul>
+    </div>	</div>
+	<div class="title">
+		<div class="titlelookandfeel">
+	<pre><h1>                                     Doodle Meet</h1></pre>
+</div>
+	</div>
+    {% endblock %}
+    <div>
+        <div class="row">
+            <div>
+                <a href="/logout"><button class="logout" value="Login">Logout</button></a>
+                <h1>{% block page_name %}{% endblock %}</h1>
+            </div>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+</body>
