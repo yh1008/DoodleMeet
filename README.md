@@ -1,11 +1,23 @@
 # DoodleMeet
 
 To run-
+
+
 1. First enter the Doodlemeet directory.
+
+
 2. Then run the doodlemeet.py file. Like python2 doodlemeet.py
+
+
 3. Then execute on shell the following commands
+
+
    export FLASK_APP=doodlemeet.py
+   
+   
    export FLASK_DEBUG=1
+   
+   
    flask run
    
 
