@@ -6,10 +6,10 @@ To run-
 1. First enter the Doodlemeet directory.
 
 
-2. Then run the doodlemeet.py file. Like python2 doodlemeet.py
+2. Then run the doodlemeet.py file.
 
 
-3. Then execute on shell the following commands
+3. Then execute the following commands  on shell 
 
 
    export FLASK_APP=doodlemeet.py
@@ -19,6 +19,10 @@ To run-
    
    
    flask run
+   
+
+
+4. Checkout the application on localhost:5000, username=admin, password=default
    
 
 
