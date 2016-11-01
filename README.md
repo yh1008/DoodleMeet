@@ -1,4 +1,31 @@
 # DoodleMeet
+
+To run-
+
+
+1. First enter the Doodlemeet directory.
+
+
+2. Then run the doodlemeet.py file.
+
+
+3. Then execute the following commands  on shell 
+
+
+   export FLASK_APP=doodlemeet.py
+   
+   
+   export FLASK_DEBUG=1
+   
+   
+   flask run
+   
+
+
+4. Checkout the application on localhost:5000, username=admin, password=default
+   
+
+
 Project Description
 
 Our aim is to build a web application that allows users to find and meet
