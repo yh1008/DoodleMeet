@@ -73,12 +73,12 @@ def close_db(error):
 
 @app.route('/getactivitylist')
 def getactivitylist():
-	print "IN HERE----------------------------------------------------------" 
+	print ("IN HERE----------------------------------------------------------") 
 	db=get_db()
 	cur=db.execute('select name from activity where aid=1')
 	mynames=cur.fetchall()
-	print mynames
-	print "JUST PRINT _----------------------------------------------"
+	print (mynames)
+	print ("JUST PRINT _----------------------------------------------")
 	return render_template('show_list.html', mynames=mynames)
 
 
