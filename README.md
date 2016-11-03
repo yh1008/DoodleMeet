@@ -2,9 +2,10 @@
 
 To run-
 (postgres version)First enter the Doodlemeet directory. The execute-
+```
    1. python server.py
 
-
+```
 
 (sqlite version) First enter the Doodlemeet directory. The execute-
    1. export FLASK_APP=doodlemeet.py
