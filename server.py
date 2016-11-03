@@ -103,7 +103,7 @@ def getfishing():
 	return render_template('show_list.html', mynames=activitynames)
 
 @app.route('/kayaking', methods = ['post', 'get'])
-def gethayaking():
+def getkayaking():
 	print ("IN HERE----------------------------------------------------------") 
 	activitynames = g.conn.execute('select name from activity where aid=8').fetchall()
 	print (activitynames)
