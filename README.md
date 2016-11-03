@@ -1,9 +1,12 @@
 # DoodleMeet
 
 To run-
+(postgres version)First enter the Doodlemeet directory. The execute-
+   1. python server.py
 
 
-First enter the Doodlemeet directory. The execute-
+
+(sqlite version) First enter the Doodlemeet directory. The execute-
    1. export FLASK_APP=doodlemeet.py
    2. flask initdb
    3. export FLASK_DEBUG=1
