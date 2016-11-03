@@ -3,16 +3,16 @@
 To run-
 (postgres version) First enter the Doodlemeet directory. The execute-
 ```
-   1. python server.py
+   $ python server.py
 
 ```
 
 (sqlite version) First enter the Doodlemeet directory. The execute-
 ```
-   1. export FLASK_APP=doodlemeet.py
-   2. flask initdb
-   3. export FLASK_DEBUG=1
-   4. flask run
+   $ export FLASK_APP=doodlemeet.py
+   $ flask initdb
+   $ export FLASK_DEBUG=1
+   $ flask run
 ```  
    
 
