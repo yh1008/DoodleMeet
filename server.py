@@ -11,7 +11,6 @@
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-#from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -23,6 +22,7 @@ app.config.from_object(__name__)
 #connect to staff managed postgres
 DATABASEURL = "postgresql://yh2901:sy38d@104.196.175.120/postgres"
 engine = create_engine(DATABASEURL)
+
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'doodlemeet.db'),
@@ -36,21 +36,6 @@ app.config.update(dict(
 ))
 app.config.from_envvar('DOODLEMEET_SETTINGS', silent=True)
 
-'''
-def connect_db():
-    """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
-    return rv
-
-
-def init_db():
-    """Initializes the database."""
-    db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
-'''
 @app.before_request
 def before_request():
   """
@@ -76,41 +61,7 @@ def teardown_request(exception):
     g.conn.close()
   except Exception as e:
     pass   
-'''
-@app.cli.command('initdb')
-def initdb_command():
-    """Creates the database tables."""
-    init_db()
-    print('Initialized the database.')
 
-
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
-
-
-@app.route('/getactivitylist')
-def getactivitylist():
-	print ("IN HERE----------------------------------------------------------") 
-	db=get_db()
-	cur=db.execute('select name from activity where aid=1')
-	mynames=cur.fetchall()
-	print (mynames)
-	print ("JUST PRINT _----------------------------------------------")
-	return render_template('show_list.html', mynames=mynames)
-
-'''
 @app.route('/concert', methods = ['post', 'get'])
 def getconcert():
 	print ("IN HERE----------------------------------------------------------") 
@@ -142,6 +93,24 @@ def getmuseum():
 	print (activitynames)
 	print ("JUST PRINT ------------------------------------------------------")
 	return render_template('show_list.html', mynames=activitynames)
+
+@app.route('/fishing', methods = ['post', 'get'])
+def getfishing():
+	print ("IN HERE----------------------------------------------------------") 
+	activitynames = g.conn.execute('select name from activity where aid=7').fetchall()
+	print (activitynames)
+	print ("JUST PRINT ------------------------------------------------------")
+	return render_template('show_list.html', mynames=activitynames)
+
+@app.route('/kayaking', methods = ['post', 'get'])
+def gethayaking():
+	print ("IN HERE----------------------------------------------------------") 
+	activitynames = g.conn.execute('select name from activity where aid=8').fetchall()
+	print (activitynames)
+	print ("JUST PRINT ------------------------------------------------------")
+	return render_template('show_list.html', mynames=activitynames)
+
+
 
 @app.route('/show_entries')
 def show_entries():
