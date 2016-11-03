@@ -111,16 +111,37 @@ def getactivitylist():
 	return render_template('show_list.html', mynames=mynames)
 
 '''
-@app.route('/getactivitylist', methods = ['post', 'get'])
-def getactivitylist():
+@app.route('/concert', methods = ['post', 'get'])
+def getconcert():
 	print ("IN HERE----------------------------------------------------------") 
-	print (g.conn)
-
 	activitynames = g.conn.execute('select name from activity where aid=1').fetchall()
 	print (activitynames)
-	print ("JUST PRINT _----------------------------------------------")
+	print ("JUST PRINT ------------------------------------------------------")
 	return render_template('show_list.html', mynames=activitynames)
 
+@app.route('/dancing', methods = ['post', 'get'])
+def getdancing():
+	print ("IN HERE----------------------------------------------------------") 
+	activitynames = g.conn.execute('select name from activity where aid=2').fetchall()
+	print (activitynames)
+	print ("JUST PRINT ------------------------------------------------------")
+	return render_template('show_list.html', mynames=activitynames)
+
+@app.route('/art', methods = ['post', 'get'])
+def getart():
+	print ("IN HERE----------------------------------------------------------") 
+	activitynames = g.conn.execute('select name from activity where aid=3').fetchall()
+	print (activitynames)
+	print ("JUST PRINT ------------------------------------------------------")
+	return render_template('show_list.html', mynames=activitynames)
+
+@app.route('/museum', methods = ['post', 'get'])
+def getmuseum():
+	print ("IN HERE----------------------------------------------------------") 
+	activitynames = g.conn.execute('select name from activity where aid=4').fetchall()
+	print (activitynames)
+	print ("JUST PRINT ------------------------------------------------------")
+	return render_template('show_list.html', mynames=activitynames)
 
 @app.route('/show_entries')
 def show_entries():
@@ -177,10 +198,10 @@ if __name__ == "__main__":
   import click
 
   @click.command()
-  @click.option('--debug', is_flag=True)
-  @click.option('--threaded', is_flag=True)
-  @click.argument('HOST', default='0.0.0.0')
-  @click.argument('PORT', default=8080, type=int)
+  @click.option('--debug', is_flag = True)
+  @click.option('--threaded', is_flag = True)
+  @click.argument('HOST', default = '0.0.0.0')
+  @click.argument('PORT', default = 8080, type=int)
   def run(debug, threaded, host, port):
     """
     This function handles command line parameters.
