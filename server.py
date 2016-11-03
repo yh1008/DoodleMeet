@@ -122,7 +122,7 @@ def getactivitylist():
 	return render_template('show_list.html', mynames=activitynames)
 
 
-@app.route('/')
+@app.route('/show_entries')
 def show_entries():
 	return render_template('show_entries.html')
 
