@@ -1,6 +1,13 @@
 # DoodleMeet
 
-To run-
+Environment set up:
+
+```
+$ sudo apt-get install postgresql-9.3 postgresql-server-dev-9.3 python-virtulaenv python-dev python-pip
+$ pip install flask psycopg2 sqlalchemy click
+```
+
+To run-  
 (postgres version) First enter the Doodlemeet directory. The execute-
 ```
    $ python server.py
