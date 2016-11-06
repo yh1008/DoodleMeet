@@ -3,6 +3,7 @@
 Environment set up:
 
 ```
+$ npm install bootstrap@3
 $ sudo apt-get install postgresql-9.3 postgresql-server-dev-9.3 python-virtulaenv python-dev python-pip
 $ pip install flask psycopg2 sqlalchemy click
 ```
