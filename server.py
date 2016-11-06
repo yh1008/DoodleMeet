@@ -62,59 +62,37 @@ def teardown_request(exception):
   except Exception as e:
     pass   
 
-@app.route('/concert', methods = ['post', 'get'])
-def getconcert():
-	print ("IN HERE----------------------------------------------------------") 
-	activitynames = g.conn.execute('select name from activity where aid=1').fetchall()
-	print (activitynames)
-	print ("JUST PRINT ------------------------------------------------------")
-	return render_template('show_list.html', mynames=activitynames)
 
-@app.route('/dancing', methods = ['post', 'get'])
-def getdancing():
-	print ("IN HERE----------------------------------------------------------") 
-	activitynames = g.conn.execute('select name from activity where aid=2').fetchall()
-	print (activitynames)
-	print ("JUST PRINT ------------------------------------------------------")
-	return render_template('show_list.html', mynames=activitynames)
-
-@app.route('/art', methods = ['post', 'get'])
-def getart():
-	print ("IN HERE----------------------------------------------------------") 
-	activitynames = g.conn.execute('select name from activity where aid=3').fetchall()
-	print (activitynames)
-	print ("JUST PRINT ------------------------------------------------------")
-	return render_template('show_list.html', mynames=activitynames)
-
-@app.route('/museum', methods = ['post', 'get'])
-def getmuseum():
-	print ("IN HERE----------------------------------------------------------") 
-	activitynames = g.conn.execute('select name from activity where aid=4').fetchall()
-	print (activitynames)
-	print ("JUST PRINT ------------------------------------------------------")
-	return render_template('show_list.html', mynames=activitynames)
-
-@app.route('/fishing', methods = ['post', 'get'])
-def getfishing():
-	print ("IN HERE----------------------------------------------------------") 
-	activitynames = g.conn.execute('select name from activity where aid=7').fetchall()
-	print (activitynames)
-	print ("JUST PRINT ------------------------------------------------------")
-	return render_template('show_list.html', mynames=activitynames)
-
-@app.route('/kayaking', methods = ['post', 'get'])
-def getkayaking():
-	print ("IN HERE----------------------------------------------------------") 
-	activitynames = g.conn.execute('select name from activity where aid=8').fetchall()
-	print (activitynames)
-	print ("JUST PRINT ------------------------------------------------------")
-	return render_template('show_list.html', mynames=activitynames)
-
-
+@app.route('/<name>')
+def handler(name):
+    act_dic = {'concert':'1', 'dancing' : '2', 'art': '3', 'museum': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11"}
+    text_dict = {'museum' : 'Museums provide places of relaxation and inspiration. And most importantly, they are a place of authenticity. We live in a world of reproductions - the objects in museums are real. It\'s a way to get away from the overload of digital technology.',
+                 'dancing' : 'The energy you give off is the energy you receive. I really think that, so I\'m always myself - jumping, dancing, singing around, trying to cheer everybody up.',
+                 'art' : 'The purpose of art is washing the dust of daily life off our souls.',
+                 'concert' : 'When you go to a great concert, you feel this arc, almost like the music of a well-chosen set takes you on this trip through emotions and through various forms of intellectual engagement.',
+                 'fishing' : '',
+                 'kayaking' : '',
+                 'pets' : '',
+                 'water_sports': '',
+                 'clubing' : ''}
+    quote_dict = {'museum' : "Thomas P. Campbell",
+                  'dancing' : 'Cara Delevingne',
+                 'art' : 'Pablo Picasso',
+                 'concert' : 'John Green',
+                 'fishing' : '',
+                 'kayaking' : '',
+                 'pets' : '',
+                 'water_sports': '',
+                 'clubing' : ''
+                 }
+    text = text_dict[name]
+    quote = quote_dict[name]
+    activity_sub_category = g.conn.execute('select name from activity where aid=' + act_dic[name]).fetchall()
+    return render_template('show_listv1.html', mynames = activity_sub_category, name = name, text = text, quote = quote)
 
 @app.route('/show_entries')
 def show_entries():
-	return render_template('show_entries.html')
+	return render_template('show_entriesv1.html')
 
 
 @app.route('/add', methods=['POST'])
@@ -126,7 +104,7 @@ def add_entry():
                [request.form['title'], request.form['text']])
     db.commit()
     flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('show_entriesv1'))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -172,20 +150,9 @@ if __name__ == "__main__":
   @click.argument('HOST', default = '0.0.0.0')
   @click.argument('PORT', default = 8080, type=int)
   def run(debug, threaded, host, port):
-    """
-    This function handles command line parameters.
-    Run the server using
-
-        python server.py
-
-    Show the help text using
-
-        python server.py --help
-
-    """
 
     HOST, PORT = host, port
-    print "running on %s:%d" % (HOST, PORT)
+    print ("running on %s:%d" % (HOST, PORT))
     app.run(host=HOST, port=PORT, debug=debug, threaded=threaded)
 
 
