@@ -65,25 +65,25 @@ def teardown_request(exception):
 
 @app.route('/<name>')
 def handler(name):
-    act_dic = {'concert':'1', 'dancing' : '2', 'art': '3', 'museum': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11"}
+    act_dic = {'concert':'1', 'dancing' : '2', 'art': '3', 'museum': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11", "sailing" : "12"}
     text_dict = {'museum' : 'Museums provide places of relaxation and inspiration. And most importantly, they are a place of authenticity. We live in a world of reproductions - the objects in museums are real. It\'s a way to get away from the overload of digital technology.',
                  'dancing' : 'The energy you give off is the energy you receive. I really think that, so I\'m always myself - jumping, dancing, singing around, trying to cheer everybody up.',
                  'art' : 'The purpose of art is washing the dust of daily life off our souls.',
                  'concert' : 'When you go to a great concert, you feel this arc, almost like the music of a well-chosen set takes you on this trip through emotions and through various forms of intellectual engagement.',
-                 'fishing' : '',
-                 'kayaking' : '',
-                 'pets' : '',
-                 'water_sports': '',
-                 'clubing' : ''}
+                 'fishing' : 'Fishing is much more than fish. It is the great occasion when we may return to the fine simplicity of our forefathers.',
+                 'kayaking' : 'Kayaking is the use of a kayak for moving across water. It is distinguished from canoeing by the sitting position of the paddler and the number of blades on the paddle. A kayak is a low-to-the-water, canoe-like boat in which the paddler sits facing forward, legs in front, using a double-bladed paddle to pull front-to-back on one side and then the other in rotation.[1] Most kayaks have closed decks, although sit-on-top and inflatable kayaks are growing in popularity as well',
+                 'pets' : 'Until one has loved an animal a part of one\'s soul remains unawakened.',
+                 'sailing': 'Channel Bill Murray’s character from What About Bob? by shouting “I’m sailing!” and “Ahoy!” throughout your voyage. You’re guaranteed to make friends.',
+                 'clubing' : 'I have Social Disease. I have to go out every night. If I stay home one night I start spreading rumours to my dogs.'}
     quote_dict = {'museum' : "Thomas P. Campbell",
                   'dancing' : 'Cara Delevingne',
                  'art' : 'Pablo Picasso',
                  'concert' : 'John Green',
-                 'fishing' : '',
-                 'kayaking' : '',
-                 'pets' : '',
-                 'water_sports': '',
-                 'clubing' : ''
+                 'fishing' : 'Herbert Hoover',
+                 'kayaking' : 'Wikipedia',
+                 'pets' : 'Anatole France',
+                 'sailing': 'timeout.com',
+                 'clubing' : 'Andy Warhol'
                  }
     text = text_dict[name]
     quote = quote_dict[name]
