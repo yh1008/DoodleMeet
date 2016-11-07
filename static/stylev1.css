@@ -5,6 +5,32 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+.dropdown {
+    font-size: 18px
+} 
+.navbar-brand {
+  font-size: 35px
+}
+.active {
+   font-size: 18px
+}
+.dropdown-menu{
+  font-size: 15px
+}
+.list-group-item{
+  background-color: transparent;
+  font-size: 20px
+}
+.list-group-item-text {
+  background-color: transparent;
+  font-size: 14px;
+  margin-left: 2em;
+  margin-bottom: 1cm;
+}
+.btn btn-secondary btn-lg active{
+  background-color: #dee2de
+}
+
 .entries        { background-color: transparent; border: none; box-shadow:none }
 .list-group     { background-color: transparent; border: none; box-shadow:none }
 .list-group-item     { background-color: transparent; border: none; box-shadow:none }
@@ -13,19 +39,8 @@ html {
 .blockquote {
   opacity: 0.8 ; 
 }
-.button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 16px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
+.btn btn-secondary btn-lg active {
+    font-size: 10px
 }
 .btn btn-default { background-color: rgba(245, 245, 245, 0); border: none; box-shadow:none }
 .blockquote {background-color: transparents}

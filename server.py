@@ -23,6 +23,7 @@ app.config.from_object(__name__)
 DATABASEURL = "postgresql://yh2901:sy38d@104.196.175.120/postgres"
 engine = create_engine(DATABASEURL)
 
+
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'doodlemeet.db'),
@@ -65,20 +66,20 @@ def teardown_request(exception):
 
 @app.route('/<name>')
 def handler(name):
-    act_dic = {'concert':'1', 'dancing' : '2', 'art': '3', 'museum': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11", "sailing" : "12"}
-    text_dict = {'museum' : 'Museums provide places of relaxation and inspiration. And most importantly, they are a place of authenticity. We live in a world of reproductions - the objects in museums are real. It\'s a way to get away from the overload of digital technology.',
+    act_dic = {'concerts':'1', 'dancing' : '2', 'art': '3', 'museums': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11", "sailing" : "12"}
+    text_dict = {'museums' : 'Museums provide places of relaxation and inspiration. And most importantly, they are a place of authenticity. We live in a world of reproductions - the objects in museums are real. It\'s a way to get away from the overload of digital technology.',
                  'dancing' : 'The energy you give off is the energy you receive. I really think that, so I\'m always myself - jumping, dancing, singing around, trying to cheer everybody up.',
                  'art' : 'The purpose of art is washing the dust of daily life off our souls.',
-                 'concert' : 'When you go to a great concert, you feel this arc, almost like the music of a well-chosen set takes you on this trip through emotions and through various forms of intellectual engagement.',
+                 'concerts' : 'When you go to a great concert, you feel this arc, almost like the music of a well-chosen set takes you on this trip through emotions and through various forms of intellectual engagement.',
                  'fishing' : 'Fishing is much more than fish. It is the great occasion when we may return to the fine simplicity of our forefathers.',
                  'kayaking' : 'Kayaking is the use of a kayak for moving across water. It is distinguished from canoeing by the sitting position of the paddler and the number of blades on the paddle. A kayak is a low-to-the-water, canoe-like boat in which the paddler sits facing forward, legs in front, using a double-bladed paddle to pull front-to-back on one side and then the other in rotation.[1] Most kayaks have closed decks, although sit-on-top and inflatable kayaks are growing in popularity as well',
                  'pets' : 'Until one has loved an animal a part of one\'s soul remains unawakened.',
                  'sailing': 'Channel Bill Murray’s character from What About Bob? by shouting “I’m sailing!” and “Ahoy!” throughout your voyage. You’re guaranteed to make friends.',
                  'clubing' : 'I have Social Disease. I have to go out every night. If I stay home one night I start spreading rumours to my dogs.'}
-    quote_dict = {'museum' : "Thomas P. Campbell",
+    quote_dict = {'museums' : "Thomas P. Campbell",
                   'dancing' : 'Cara Delevingne',
                  'art' : 'Pablo Picasso',
-                 'concert' : 'John Green',
+                 'concerts' : 'John Green',
                  'fishing' : 'Herbert Hoover',
                  'kayaking' : 'Wikipedia',
                  'pets' : 'Anatole France',
@@ -88,11 +89,88 @@ def handler(name):
     text = text_dict[name]
     quote = quote_dict[name]
     activity_sub_category = g.conn.execute('select name from activity where aid=' + act_dic[name]).fetchall()
-    return render_template('show_listv1.html', mynames = activity_sub_category, name = name, text = text, quote = quote)
+    if (session['logged_in']):
+        log_info = " Logout"
+    else:
+        log_info = " Login"
+    return render_template('show_listv1.html',
+                            mynames = activity_sub_category, 
+                            name = name, 
+                            text = text, 
+                            quote = quote,
+                            log_info = log_info)
+
+@app.route('/getratings/<activity_subcategory>/<pid>/<aid>/<aaid>')
+def rating_display(activity_subcategory, pid, aid, aaid):
+    username_map = {"emily" : 1, "dhruv" : 8}
+    uid = username_map[str(session['username'])]
+    print ("user name: ", session['username'])
+    print ("******************I am in rating_display *********************************")
+    print ("pid,aid, aaid: ", pid, aid, aaid)
+    if (str(aid) == 'static'):
+        return  ('', 204)
+    avg_rating = g.conn.execute('SELECT AVG(score) FROM rate r JOIN friendship f ON r.usr = f.friend WHERE f.usr = %d AND pid = %d AND activity_category = %d AND activity_subcategory = %d;'
+                                 %(uid, int(pid), int(aid), int(aaid))).fetchall()
+    entry_by_location = g.conn.execute('select * from location where pid = %d and aid = %d and aaid = %d '%(int(pid), int(aid), int(aaid))).fetchall()[0]
+    rating_list = g.conn.execute('SELECT * FROM rate r JOIN friendship f ON r.usr = f.friend WHERE f.usr = %d AND pid = %d AND activity_category = %d AND activity_subcategory = %d;'
+                                 %(uid, int(pid), int(aid), int(aaid))).fetchall()
+    print ("whole list of rating: ", rating_list)
+    friends_comment = [] #stores [firstname, lastname, comment, rating]
+    for entry in rating_list:
+        friend_name = g.conn.execute('SELECT firstname, lastname from users WHERE uid=%d'%int(entry[1])).fetchall()[0]
+        friends_comment.append([friend_name[0], friend_name[1], entry[5], entry[6]])
+    activity_category = g.conn.execute('select name from activitycategory where aid =%d'% int(aid)).fetchall()[0][0]
+    print ("friends_comment: ", friends_comment) 
+    print (" entry_by_location: ",  entry_by_location)
+    print ("activity_category: ", activity_category)
+    print ("avg rating: ", avg_rating)
+    #handle no rating yet case
+    if (avg_rating[0][0] == None):
+        avg_rating = "no rating"
+    else:
+        avg_rating = int(avg_rating[0][0])
+    #get logging info 
+    if (session['logged_in']):
+        log_info = " Logout"
+    else:
+        log_info = " Login"
+    return render_template('show_ratings.html', 
+                            rating = avg_rating, 
+                            mynames = entry_by_location, 
+                            activity_subcategory = activity_subcategory, 
+                            activity_category = activity_category,
+                            friends_comment = friends_comment,
+                            log_info = log_info)
+
+@app.route('/getloc/<name>')
+def loc_display(name):
+    print ("******************I am in loc_display *********************************")
+    location_table_keys = ["pid", 'aid', 'aaid', 'open_time', 'close_time', 'state', 'city', 'name']
+    res = g.conn.execute("select aid, aaid from activity where name='%s'"%name).fetchall()
+    aid = res[0][0]
+    aaid = res[0][1]
+    activity_category =  g.conn.execute("select name from activitycategory where aid='%d'"%aid).fetchall()[0][0]
+    print ("activity_category", activity_category)
+    entry_by_location = g.conn.execute('select * from location where aid = %d and aaid = %d'%(aid,aaid)).fetchall()
+    print (entry_by_location)
+    if (session['logged_in']):
+        log_info = " Logout"
+    else:
+        log_info = " Login"
+    return render_template('show_locations.html', 
+                            name = name, 
+                            mynames = entry_by_location, 
+                            activity_category = str(activity_category),
+                            log_info = log_info)
 
 @app.route('/show_entries')
 def show_entries():
-	return render_template('show_entriesv1.html')
+    if (session['logged_in']):
+        log_info = " Logout"
+    else:
+        log_info = " Login"
+    print ("logged in : ",session['logged_in'])
+    return render_template('show_entriesv1.html', log_info = log_info)
 
 
 @app.route('/add', methods=['POST'])
@@ -118,7 +196,7 @@ def login():
         else:
             session['logged_in'] = True
             flash('You were logged in')
-            
+            session['username'] = request.form['username']
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
 
@@ -153,7 +231,7 @@ if __name__ == "__main__":
 
     HOST, PORT = host, port
     print ("running on %s:%d" % (HOST, PORT))
-    app.run(host=HOST, port=PORT, debug=debug, threaded=threaded)
+    app.run(host = HOST, port = PORT, debug = debug, threaded = threaded,  use_reloader = False)
 
 
   run()
