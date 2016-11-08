@@ -64,7 +64,7 @@ def teardown_request(exception):
     pass   
 
 
-@app.route('/<name>')
+@app.route('/show_activitylist/<name>')
 def handler(name):
     act_dic = {'concerts':'1', 'dancing' : '2', 'art': '3', 'museums': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11", "sailing" : "12"}
     text_dict = {'museums' : 'Museums provide places of relaxation and inspiration. And most importantly, they are a place of authenticity. We live in a world of reproductions - the objects in museums are real. It\'s a way to get away from the overload of digital technology.',
@@ -136,7 +136,7 @@ def rating_display(activity_subcategory, pid, aid, aaid):
         log_info = " Login"
     return render_template('show_ratings.html', 
                             rating = avg_rating, 
-                            mynames = entry_by_location, 
+                            entry_by_location  = entry_by_location, 
                             activity_subcategory = activity_subcategory, 
                             activity_category = activity_category,
                             friends_comment = friends_comment,
@@ -171,6 +171,43 @@ def show_entries():
         log_info = " Login"
     print ("logged in : ",session['logged_in'])
     return render_template('show_entriesv1.html', log_info = log_info)
+
+
+@app.route('/add_comment/activity', methods=['POST','GET'])
+def add_comment():
+    print ("******************I am in add_comment() *********************************")
+    comment = request.form['comment']
+    pid = int(request.form['pid'])
+    aid = int(request.form['aid'])
+    aaid = int(request.form['aaid'])
+    activity_subcategory = g.conn.execute('select name from activity where aid = %d and aaid = %d'%(aid, aaid)).fetchall()[0][0]
+    activity_subcategory = str(activity_subcategory)
+    latest_rid = int(g.conn.execute('select max(rid) from rate').fetchall()[0][0])
+    rid = latest_rid+1
+    print ("latest_rid: ", latest_rid)
+    #print ("pid: %s, aid: %s, aaid: %s"%(pid, aid, aaid))
+    print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
+    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
+    username_map = {"emily" : 1, "dhruv" : 8}
+    uid = username_map[str(session['username'])]
+    score = 5
+    g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score=score)
+    
+    new_comment = g.conn.execute('SELECT comment from rate WHERE rid=%d'%rid).fetchall()[0][0]
+    print ("newly entered comment: ", new_comment)
+    entry_by_location = g.conn.execute('select * from location where pid = %d and aid = %d and aaid = %d '%(int(pid), int(aid), int(aaid))).fetchall()[0]
+    activity_category =  g.conn.execute("select name from activitycategory where aid='%d'"%aid).fetchall()[0][0]
+    if (session['logged_in']):
+        log_info = " Logout"
+    else:
+        log_info = " Login"
+    return render_template('show_comment.html', 
+                            entry_by_location  = entry_by_location, 
+                            activity_subcategory = activity_subcategory, 
+                            activity_category = activity_category,
+                            new_comment = new_comment,
+                            log_info = log_info)
 
 
 @app.route('/add', methods=['POST'])

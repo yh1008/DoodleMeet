@@ -32,6 +32,7 @@
     <li class="list-group-item">
         {{ entry[7] }}
         <a href = "{{ url_for ('rating_display', activity_subcategory = name, pid = entry[0], aid =entry[1], aaid = entry[2] ) }}" class="btn btn-secondary btn-lg active" role="button">get rating from your friends</a>
+
     </li>
     <p class="list-group-item-text">  | open time: {{entry[3]}}   close time : {{entry[4]}}   city : {{entry[6]}}   state : {{entry[5]}} </p>
      
