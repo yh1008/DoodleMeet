@@ -134,12 +134,25 @@ def rating_display(activity_subcategory, pid, aid, aaid):
         log_info = " Logout"
     else:
         log_info = " Login"
+    
+    #show routes about this place#
+    routes = g.conn.execute('select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
+                where pid=%d and aid=%d and aaid=%d;'%(int(pid), int(aid), int(aaid))).fetchall()
+    #show most fun routes about his place|activity
+    most_fun_routes = g.conn.execute('SELECT a.n FROM (SELECT route_number, rt.name n, count(*) counts FROM \
+                           ratefunroute r JOIN friendship f ON r.uid = f.friend JOIN route rt ON rt.rid = r.route_number \
+                           WHERE f.usr = %d AND pid = %d AND aid = %d AND aaid = %d GROUP BY route_number, rt.name ORDER BY counts desc \
+                           limit 1)a ;'%(uid, int(pid), int(aid), int(aaid))).fetchall()[0][0]
+    print ("routes", routes)
+    print ("most_fun_routes: ", most_fun_routes)
     return render_template('show_ratings.html', 
                             rating = avg_rating, 
                             entry_by_location  = entry_by_location, 
                             activity_subcategory = activity_subcategory, 
                             activity_category = activity_category,
                             friends_comment = friends_comment,
+                            routes = routes,
+                            most_fun_routes = most_fun_routes,
                             log_info = log_info)
 
 @app.route('/getloc/<name>')
@@ -191,7 +204,8 @@ def add_comment():
                 VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
     username_map = {"emily" : 1, "dhruv" : 8}
     uid = username_map[str(session['username'])]
-    score = 5
+    score = request.form['rating']
+    print ("rating: ", score)
     g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score=score)
     
     new_comment = g.conn.execute('SELECT comment from rate WHERE rid=%d'%rid).fetchall()[0][0]
@@ -207,7 +221,15 @@ def add_comment():
                             activity_subcategory = activity_subcategory, 
                             activity_category = activity_category,
                             new_comment = new_comment,
+                            score = score,
                             log_info = log_info)
+
+@app.route("/get_route", methods = ['POST'])
+def add_route_rating():
+    print ("******************I am in add_route_rating*********************")
+    query = 'select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
+                where pid=1 and aid=4 and aaid=1;'
+
 
 
 @app.route('/add', methods=['POST'])
