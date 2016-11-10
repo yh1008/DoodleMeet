@@ -31,7 +31,7 @@
     <li class="list-group-item">
         {{ mynames[7] }}
         <span class="btn btn-secondary btn-lg active" >{{rating}}/5</span>
-         <a href = "#"  class="btn btn-secondary btn-lg active"  role = 'button'>add to interest list</a>
+         <a href = "{{url_for('added_time', aid = aid, aaid = aaid, pid = pid)}}"  class="btn btn-secondary btn-lg active"  role = 'button'>add to interest list</a>
     </li>
     <p class="list-group-item-text">  | open time: {{mynames[3]}}   close time : {{mynames[4]}}   city : {{mynames[6]}}   state : {{mynames[5]}} </p>
     <div class="list-group">
