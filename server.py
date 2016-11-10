@@ -241,7 +241,8 @@ def add_comment():
     print ("latest_rid: ", latest_rid)
     #print ("pid: %s, aid: %s, aaid: %s"%(pid, aid, aaid))
     print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
-    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score) VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
+    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
     username_map = {"emily" : 1, "dhruv" : 8}
     uid = username_map[str(session['username'])]
     score = request.form['rating']
