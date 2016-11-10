@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<html class ='home'>
+<head>
+  <title>Doodle Meet</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/static/stylev1.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{{ url_for('show_entries') }}">Doodle Meet</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="{{ url_for('show_entries') }}">Home</a></li>
+      <li class="active"><a href="{{ url_for ('handler', name = activity_category ) }}">{{activity_subcategory}}</a></li>
+     </ul>
+    <ul class="nav navbar-nav navbar-right">
+       <!--<li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li> -->
+      <li><a href="/logout"><span class="glyphicon glyphicon-log-in"></span>{{log_info}}</a></li>
+    </ul>
+  </div>
+</nav>
+<ul class="list-group">
+    <li class="list-group-item">
+        {{ entry_by_location[7] }}
+        <span class="btn btn-secondary btn-lg active" ></span>
+         <a href = "#"  class="btn btn-secondary btn-lg active"  role = 'button'></a>
+    </li>
+    <p class="list-group-item-text">  | open time: {{entry_by_location[3]}}   close time : {{entry_by_location[4]}}   city : {{entry_by_location[6]}}   state : {{entry_by_location[5]}} </p>
+    <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action active">
+            <h5 class="list-group-item-heading">you commented this place: </h5>
+            <p class="list-group-item-text">"{{new_comment}}"</p>
+            <h5 class="list-group-item-heading">you rate this place: </h5>
+            <p class="list-group-item-text">{{score}}/5</p>
+        </a>
+    </div>
+
+     
+    
+</ul>
+
+</body>
+</html>
