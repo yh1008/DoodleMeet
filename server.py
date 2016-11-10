@@ -11,6 +11,7 @@
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
+from sqlalchemy.dialects.postgresql import insert
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -52,6 +53,7 @@ def before_request():
     print ("uh oh, problem connecting to database")
     import traceback; traceback.print_exc()
     g.conn = None
+
 @app.teardown_request
 def teardown_request(exception):
   """
@@ -146,6 +148,9 @@ def rating_display(activity_subcategory, pid, aid, aaid):
     print ("routes", routes)
     print ("most_fun_routes: ", most_fun_routes)
     return render_template('show_ratings.html', 
+    						pid = pid,
+    						aid = aid,
+    						aaid = aaid,
                             rating = avg_rating, 
                             entry_by_location  = entry_by_location, 
                             activity_subcategory = activity_subcategory, 
@@ -155,6 +160,7 @@ def rating_display(activity_subcategory, pid, aid, aaid):
                             most_fun_routes = most_fun_routes,
                             log_info = log_info)
 
+#, activity_subcategory = activity_subcategory, pid = pid, start_time = mynames[3], end_time = mynames[4], budget = pid)
 @app.route('/getloc/<name>')
 def loc_display(name):
     print ("******************I am in loc_display *********************************")
@@ -184,6 +190,41 @@ def show_entries():
         log_info = " Login"
     print ("logged in : ",session['logged_in'])
     return render_template('show_entriesv1.html', log_info = log_info)
+
+@app.route('/added_time/<aid>/<aaid>/<pid>', methods=['POST','GET'])
+def added_time(aid, aaid, pid):
+	print("****************************************I am in Added_Time*******************************************")
+	startdatetime = str(request.form['startdatetime'])
+	enddatetime = str(request.form['enddatetime'])
+	startdate_and_time=startdatetime.split('T')
+	startdatetime=startdate_and_time[0]+ ' ' + startdate_and_time[1]
+	enddate_and_time=enddatetime.split('T')
+	enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
+	budget=int(request.form['budget'])
+	username_map = {"emily" : 1, "dhruv" : 8}
+	uid = username_map[str(session['username'])]
+	entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), %d)" %(int(uid), int(aid), int(aaid), int(pid), startdatetime, enddatetime, budget))
+	return redirect(url_for('show_entries'))
+    
+    
+
+@app.route('/interests')
+def display_interest_list():
+	if not session.get('logged_in'):
+		abort(401)
+	
+	username_map = {"emily" : 1, "dhruv" : 8}
+	uid = username_map[str(session['username'])]
+	entry_by_location2=g.conn.execute('select pid, aid, aaid from location').fetchall()
+	entry_by_location3=g.conn.execute('select pid, activity_category, activity_subcategory from interest where usr = %d' %uid).fetchall()
+	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
+	print(entry_by_location1)
+	print(entry_by_location2)
+	print(entry_by_location3)
+	return render_template('show_interest_list.html', 
+                            mynames = entry_by_location1, 
+                            
+                            )
 
 
 @app.route('/add_comment/activity', methods=['POST','GET'])
@@ -247,6 +288,7 @@ def add_entry():
 @app.route('/', methods=['GET', 'POST'])
 def login():
     error = None
+    print "logged in DHruv"
     if request.method == 'POST':
         if request.form['username'] != app.config['USERNAME1'] and request.form['username'] != app.config['USERNAME2']:
             error = 'Invalid username'

@@ -32,9 +32,20 @@
     <li class="list-group-item">
         {{ entry_by_location[7] }}
         <span class="btn btn-secondary btn-lg active" >{{rating}}/5</span>
-         <a href = "#"  class="btn btn-secondary btn-lg active"  role = 'button'>add to interest list</a>
+         
     </li>
     <p class="list-group-item-text">  | open time: {{entry_by_location[3]}}   close time : {{entry_by_location[4]}}   city : {{entry_by_location[6]}}   state : {{entry_by_location[5]}} </p>
+
+	<form action ="{{url_for('added_time', aid = aid, aaid = aaid, pid = pid)}}" method="POST">
+	  Start Time:
+	  <input type="datetime-local" name="startdatetime">
+	  End Time:
+	  <input type="datetime-local" name="enddatetime">
+	 Budget:
+	  <input type="text" name="budget" placeholder="Enter your estimated budget">
+	  <input type="submit" class="btn btn-info" value="Add to Interest List">
+	</form> 
+
     <div class="list-group">
         <a href="#" class="list-group-item list-group-item-action active">
             {% for entry in friends_comment %}
