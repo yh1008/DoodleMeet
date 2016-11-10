@@ -30,11 +30,15 @@
 <ul class="list-group">
     {% for entry in mynames %}
     <li class="list-group-item">
-        {{ entry[7] }}
-        <a href = "{{ url_for ('rating_display', activity_subcategory = name, pid = entry[0], aid =entry[1], aaid = entry[2] ) }}" class="btn btn-secondary btn-lg active" role="button">get rating from your friends</a>
+        <p style="color:#6699ff;font-size:30px">{{ entry[7] }}</p>
+        <a href = "{{ url_for ('rating_display', activity_subcategory = name, pid = entry[0], aid =entry[1], aaid = entry[2] ) }}" class = "ratingsbutton">GET RATINGS</a>
 
     </li>
-    <p class="list-group-item-text">  | open time: {{entry[3]}}   close time : {{entry[4]}}   city : {{entry[6]}}   state : {{entry[5]}} </p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry[3]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Closing time : {{entry[4]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; City : {{entry[6]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; State : {{entry[5]}} </p>
+
      
    {% endfor %}
     

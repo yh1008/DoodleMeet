@@ -34,27 +34,46 @@
         <span class="btn btn-secondary btn-lg active" >{{rating}}/5</span>
          
     </li>
-    <p class="list-group-item-text">  | open time: {{entry_by_location[3]}}   close time : {{entry_by_location[4]}}   city : {{entry_by_location[6]}}   state : {{entry_by_location[5]}} </p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry_by_location[3]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Closing time : {{entry_by_location[4]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; City : {{entry_by_location[6]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; State : {{entry_by_location[5]}} </p>
+ 
 
+	<br><br>
 	<form action ="{{url_for('added_time', aid = aid, aaid = aaid, pid = pid)}}" method="POST">
-	  Start Time:
-	  <input type="datetime-local" name="startdatetime">
-	  End Time:
-	  <input type="datetime-local" name="enddatetime">
-	 Budget:
-	  <input type="text" name="budget" placeholder="Enter your estimated budget">
+	 <div class="ratingsform"> <p style="color: #696969;font-size:20px;">Start Time:</p></div>
+	  <input type="datetime-local" name="startdatetime" style="font-size: 15px;">
+         <div class="ratingsform"> <p style="color: #696969;font-size:20px;">End Time:</p></div>
+	  <input type="datetime-local" name="enddatetime" style="font-size: 15px;">
+	 <div class="ratingsform"> <p style="color: #696969;font-size:20px;">Budget:</p></div>	 
+	  <input type="text" name="budget" placeholder="Enter your estimated budget" style="font-size: 15px;">
 	  <input type="submit" class="btn btn-info" value="Add to Interest List">
-	</form> 
+	</form> <br><br>
 
     <div class="list-group">
         <a href="#" class="list-group-item list-group-item-action active">
             {% for entry in friends_comment %}
             <h5 class="list-group-item-heading">{{entry[0]}} {{entry[1]}}| rates this place {{entry[3]}}/5</h5>
-            <p class="list-group-item-text">"{{entry[2]}}"</p>
+            <p class="list-group-item-text">"{{entry[2]}}"</p><br>
             {% endfor %}
         </a>
     </div>
 </ul>
+
+<div class="dropup">
+  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" style="background-color: #ff4d4d;">Majority of your friends suggest {{most_fun_routes}} as the best mode of transportation to reach this destination. Other potential routes include
+  <span class="caret"></span></button>
+
+  <ul class="dropdown-menu">
+      {% for route in routes %}
+       <li><a class="dropdown-item disabled" >{{route[0]}}</a></li>
+        
+      {% endfor %}
+  </ul>
+</div>
+<br><br>
+
 
 <div class = "inputcontainer">
     <form method="POST" action="/add_comment/activity">
@@ -78,19 +97,6 @@
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
 </div>
-<div class="dropup">
-  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">your friends think the best route is *{{most_fun_routes}}*,
-       but still let's show potential routes to this place
-  <span class="caret"></span></button>
-
-  <ul class="dropdown-menu">
-      {% for route in routes %}
-       <li><a class="dropdown-item disabled" >{{route[0]}}</a></li>
-        
-      {% endfor %}
-  </ul>
-</div>
-
 
 </body>
 </html>

@@ -21,11 +21,29 @@ html {
   background-color: transparent;
   font-size: 20px
 }
+.list-group .list-group-item .ratingsbutton {
+    background-color: #00bfff;
+    border-radius: 10px;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    float: right;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.list-group .ratingsform {
+	display:inline-block;
+} 
+
 .list-group-item-text {
   background-color: transparent;
   font-size: 14px;
   margin-left: 2em;
   margin-bottom: 1cm;
+  margin:0;
 }
 .btn btn-secondary btn-lg active{
   background-color: #dee2de
@@ -44,3 +62,4 @@ html {
 }
 .btn btn-default { background-color: rgba(245, 245, 245, 0); border: none; box-shadow:none }
 .blockquote {background-color: transparents}
+
