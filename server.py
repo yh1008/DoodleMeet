@@ -191,20 +191,19 @@ def show_entries():
     print ("logged in : ",session['logged_in'])
     return render_template('show_entriesv1.html', log_info = log_info)
 
-@app.route('/added_time/<aid>/<aaid>/<pid>')
+@app.route('/added_time/<aid>/<aaid>/<pid>', methods=['POST','GET'])
 def added_time(aid, aaid, pid):
 	print("****************************************I am in Added_Time*******************************************")
+	startdatetime = str(request.form['startdatetime'])
+	enddatetime = str(request.form['enddatetime'])
+	startdate_and_time=startdatetime.split('T')
+	startdatetime=startdate_and_time[0]+ ' ' + startdate_and_time[1]
+	enddate_and_time=enddatetime.split('T')
+	enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
+	budget=int(request.form['budget'])
 	username_map = {"emily" : 1, "dhruv" : 8}
 	uid = username_map[str(session['username'])]
-	starttime = "2016-11-15 10:13" #hardcoding for now. This would be inputted by the user.
-	endtime = "2016-10-15 11:24"   #hardcoding for now. This would be inputted by the user.
-	print(type(starttime))         #prints str
-	budget = 1000
-	entry_by_location1 = g.conn.execute('select * from interest').fetchall()
-	print(entry_by_location1)
-	entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH:MI'), %d)" %(int(1), int(4), int(1), int(1), starttime, endtime, 4000))
-	entry_by_location1 = g.conn.execute('select * from interest').fetchall()
-	print(entry_by_location1)
+	entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), %d)" %(int(uid), int(aid), int(aaid), int(pid), startdatetime, enddatetime, budget))
 	return redirect(url_for('show_entries'))
     
     
@@ -242,8 +241,7 @@ def add_comment():
     print ("latest_rid: ", latest_rid)
     #print ("pid: %s, aid: %s, aaid: %s"%(pid, aid, aaid))
     print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
-    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
-                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
+    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score) VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
     username_map = {"emily" : 1, "dhruv" : 8}
     uid = username_map[str(session['username'])]
     score = request.form['rating']
