@@ -2,6 +2,77 @@
 <html lang="en">
 <html class ='home'>
 <head>
+<style>
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+</style>
   <title>Doodle Meet</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +80,8 @@
   <link rel="stylesheet" type="text/css" href="/static/stylev1.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../static/js/modal.js?v=60"></script>
+
 </head>
 <body>
 
@@ -27,18 +100,74 @@
     </ul>
   </div>
 </nav>
+{% set a = 0 %}
 <ul class="list-group">
     {% for entry in mynames %}
+	{{mynames[loop.index-1][0]}}
     <li class="list-group-item">
-        {{ entry[0] }}
-    <a href = "#"  class="btn btn-secondary btn-lg active"  role = 'button'>Find Friends</a>
-    <a href = "#"  class="btn btn-secondary btn-lg active"  role = 'button'>Know Your Equipment</a>
-    </li>
-    <p class="list-group-item-text">  | open time: {{entry[3]}}   close time : {{entry[4]}}   city : {{entry[2]}}   state : {{entry[1]}} </p>
-     
-   {% endfor %}
-    
-</ul>
+               <p style="color:#6699ff;font-size:30px">{{ entry[0] }}</p>
 
+        <button class = "ratingsbutton" id="{{loop.index}}">KNOW YOUR EQUIPMENT</a>
+        <button class = "ratingsbutton" >FIND FRIENDS</a>
+    </li>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry[3]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Closing time : {{entry[4]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; City : {{entry[2]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; State : {{entry[1]}} </p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Expected Duration : {{entry[5]}} - {{entry[6]}} </p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Estimated Budget : {{entry[7]}} </p>
+	
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">×</span>
+      <h2>Modal Header</h2>
+    </div>
+    <div class="modal-body">
+      <p>Some text in the Modal Body</p>
+      <p>Some other text...</p>
+    </div>
+    <div class="modal-footer">
+      <h3>Modal Footer</h3>
+    </div>
+  </div>
+
+</div>   {% endfor %}
+	<input type="hidden" id="myVar" name="variable" value="{{ mynames[0][0] }}">    
+</ul>
+<script>
+var modal = document.getElementById('myModal');
+var span = document.getElementsByClassName("close");
+for(var i=0;i<span.length;i++)
+	span[i].onclick = function(){
+	modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+  <script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
+<script type=text/javascript>var myaid=document.getElementById("myVar").value</script>	
+  <script type="text/javascript">
+$(".ratingsbutton").click(function(){
+	functioncalled();
+});
+
+function functioncalled(){
+	console.log(myaid);
+	$.getJSON($SCRIPT_ROOT + "/find_activitygear",{query:4}).done(function(data){
+	modal.style.display = "block";
+});
+}
+
+
+</script>
 </body>
 </html>
