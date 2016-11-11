@@ -107,7 +107,7 @@
     <li class="list-group-item">
                <p style="color:#6699ff;font-size:30px">{{ entry[0] }}</p>
 
-        <button class = "ratingsbutton" id="{{loop.index}}">KNOW YOUR EQUIPMENT</a>
+        <button name = "{{entry[8]}}" class = "ratingsbutton" id="{{loop.index}}">KNOW YOUR EQUIPMENT</a>
         <button class = "ratingsbutton" >FIND FRIENDS</a>
     </li>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry[3]}}</p>
@@ -125,14 +125,13 @@
   <div class="modal-content">
     <div class="modal-header">
       <span class="close">×</span>
-      <h2>Modal Header</h2>
+      <h2>Gears required for this activity include:</h2>
     </div>
     <div class="modal-body">
-      <p>Some text in the Modal Body</p>
-      <p>Some other text...</p>
+      <ul id="myulID"></ul>
     </div>
     <div class="modal-footer">
-      <h3>Modal Footer</h3>
+      <h3>DoodleMeet wishes you a pleasant recreation!</h3>
     </div>
   </div>
 
@@ -145,24 +144,39 @@ var span = document.getElementsByClassName("close");
 for(var i=0;i<span.length;i++)
 	span[i].onclick = function(){
 	modal.style.display = "none";
+	var ul = document.getElementById("myulID");
+	while( ul.firstChild ){
+	  ul.removeChild( ul.firstChild );
+}
 }
 
 window.onclick = function(event) {
     if (event.target == modal) {
         modal.style.display = "none";
+	var ul = document.getElementById("myulID");
+	while( ul.firstChild ){
+	  ul.removeChild( ul.firstChild );
+}
     }
 }
 </script>
   <script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
-<script type=text/javascript>var myaid=document.getElementById("myVar").value</script>	
   <script type="text/javascript">
 $(".ratingsbutton").click(function(){
-	functioncalled();
+	console.log(this.name);
+	functioncalled(Number(this.name));
 });
 
-function functioncalled(){
-	console.log(myaid);
-	$.getJSON($SCRIPT_ROOT + "/find_activitygear",{query:4}).done(function(data){
+function functioncalled(activityID){
+	$.getJSON($SCRIPT_ROOT + "/find_activitygear",{query:activityID}).done(function(data){
+	var ul = document.getElementById("myulID");
+
+	for (var i = 0; i < data.length; i++){
+	var li = document.createElement("li");	
+	li.appendChild(document.createTextNode(data[i]));
+	ul.appendChild(li);
+	}
+	
 	modal.style.display = "block";
 });
 }
