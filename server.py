@@ -9,10 +9,12 @@
 """
 
 import os
+import json
+import flask
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from sqlalchemy.dialects.postgresql import insert
-from flask import Flask, request, session, g, redirect, url_for, abort, \
+from flask import Flask, Response, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
 
@@ -189,6 +191,7 @@ def show_entries():
     else:
         log_info = " Login"
     print ("logged in : ",session['logged_in'])
+    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7")
     return render_template('show_entriesv1.html', log_info = log_info)
 
 @app.route('/added_time/<aid>/<aaid>/<pid>', methods=['POST','GET'])
@@ -215,12 +218,7 @@ def display_interest_list():
 	
 	username_map = {"emily" : 1, "dhruv" : 8}
 	uid = username_map[str(session['username'])]
-	entry_by_location2=g.conn.execute('select pid, aid, aaid from location').fetchall()
-	entry_by_location3=g.conn.execute('select pid, activity_category, activity_subcategory from interest where usr = %d' %uid).fetchall()
-	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
-	print(entry_by_location1)
-	print(entry_by_location2)
-	print(entry_by_location3)
+	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
 	return render_template('show_interest_list.html', 
                             mynames = entry_by_location1, 
                             
@@ -270,6 +268,25 @@ def add_route_rating():
     print ("******************I am in add_route_rating*********************")
     query = 'select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
                 where pid=1 and aid=4 and aaid=1;'
+
+
+@app.route('/trial')
+def trial():
+	print "3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"
+	myDict={'a' : 2, 'b' : 3}
+	return flask.jsonify(**myDict)
+
+@app.route('/find_activitygear')
+def find_activitygear():
+	activityID = request.args.get('query', 0, type=int)
+	print(activityID)
+	print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+	getgear= g.conn.execute('select name from gears INNER JOIN gearstocarry ON gears.gid=gearstocarry.gid where gearstocarry.aid=%d' %activityID).fetchall()
+	l=[]
+	for i in getgear:
+		l.append(str(i[0]))
+	print l
+	return Response(json.dumps(l), mimetype='application/json')
 
 
 
