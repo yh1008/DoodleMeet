@@ -13,7 +13,7 @@ import json
 import flask
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from sqlalchemy.dialects.postgresql import insert
+#from sqlalchemy.dialects.postgresql import insert
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -146,7 +146,12 @@ def rating_display(activity_subcategory, pid, aid, aaid):
     most_fun_routes = g.conn.execute('SELECT a.n FROM (SELECT route_number, rt.name n, count(*) counts FROM \
                            ratefunroute r JOIN friendship f ON r.uid = f.friend JOIN route rt ON rt.rid = r.route_number \
                            WHERE f.usr = %d AND pid = %d AND aid = %d AND aaid = %d GROUP BY route_number, rt.name ORDER BY counts desc \
-                           limit 1)a ;'%(uid, int(pid), int(aid), int(aaid))).fetchall()[0][0]
+                           limit 1)a ;'%(uid, int(pid), int(aid), int(aaid))).fetchall()
+
+    if (len(most_fun_routes)==0):
+        most_fun_routes = "the potential route to this place are" #friends haven't rated this place yet
+    else:
+        most_fun_routes = "Majority of your friends suggest {} as the best mode of transportation to reach this destination. Other potential routes include".format(most_fun_routes[0][0])
     print ("routes", routes)
     print ("most_fun_routes: ", most_fun_routes)
     return render_template('show_ratings.html', 
@@ -191,7 +196,6 @@ def show_entries():
     else:
         log_info = " Login"
     print ("logged in : ",session['logged_in'])
-    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7")
     return render_template('show_entriesv1.html', log_info = log_info)
 
 @app.route('/added_time/<aid>/<aaid>/<pid>', methods=['POST','GET'])
@@ -213,14 +217,15 @@ def added_time(aid, aaid, pid):
 
 @app.route('/interests')
 def display_interest_list():
-	if not session.get('logged_in'):
+    if not session.get('logged_in'):
 		abort(401)
-	
-	username_map = {"emily" : 1, "dhruv" : 8}
-	uid = username_map[str(session['username'])]
-	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
-	return render_template('show_interest_list.html', 
-                            mynames = entry_by_location1, 
+    username_map = {"emily" : 1, "dhruv" : 8}
+    uid = username_map[str(session['username'])]
+    entry_by_location = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
+    if (len(entry_by_location) == 0):
+        entry_by_location = [["you don't have anything on interest list yet"]]
+    return render_template('show_interest_list.html', 
+                            mynames = entry_by_location, 
                             
                             )
 
@@ -344,7 +349,7 @@ if __name__ == "__main__":
   @click.option('--debug', is_flag = True)
   @click.option('--threaded', is_flag = True)
   @click.argument('HOST', default = '0.0.0.0')
-  @click.argument('PORT', default = 8080, type=int)
+  @click.argument('PORT', default = 8000, type=int)
   def run(debug, threaded, host, port):
 
     HOST, PORT = host, port
