@@ -4,7 +4,7 @@
 <head>
 <style>
 /* The Modal (background) */
-.modal {
+.modal_friends {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -19,7 +19,7 @@
 }
 
 /* Modal Content */
-.modal-content {
+.modal-content_friends {
     position: relative;
     background-color: #fefefe;
     margin: auto;
@@ -45,33 +45,102 @@
 }
 
 /* The Close Button */
-.close {
+.close_friends {
     color: white;
     float: right;
     font-size: 28px;
     font-weight: bold;
 }
 
-.close:hover,
-.close:focus {
+.close_friends:hover,
+.close_friends:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
 }
 
-.modal-header {
+.modal-header_friends {
     padding: 2px 16px;
-    background-color: #5cb85c;
+    background-color: #00bfff;
     color: white;
 }
 
-.modal-body {padding: 2px 16px;}
+.modal-body_friends {padding: 2px 16px;}
 
-.modal-footer {
+.modal-footer_friends {
     padding: 2px 16px;
-    background-color: #5cb85c;
+    background-color: #00bfff;
     color: white;
 }
+.modal_equipment {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content_equipment {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.close_equipment {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close_equipment:hover,
+.close_equipment:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header_equipment {
+    padding: 2px 16px;
+    background-color: #ff3333;
+    color: white;
+}
+
+.modal-body_equipment {padding: 2px 16px;}
+
+.modal-footer_equipment {
+    padding: 2px 16px;
+    background-color: #ff3333;
+    color: white;
+}
+
 </style>
   <title>Doodle Meet</title>
   <meta charset="utf-8">
@@ -103,12 +172,11 @@
 {% set a = 0 %}
 <ul class="list-group">
     {% for entry in mynames %}
-	{{mynames[loop.index-1][0]}}
     <li class="list-group-item">
                <p style="color:#6699ff;font-size:30px">{{ entry[0] }}</p>
 
-        <button name = "{{entry[8]}}" class = "ratingsbutton" id="{{loop.index}}">KNOW YOUR EQUIPMENT</a>
-        <button class = "ratingsbutton" >FIND FRIENDS</a>
+        <button name = "{{entry[8]}}" class = "ratingsbutton_equipment" id="{{loop.index}}">KNOW YOUR EQUIPMENT</a>
+        <button name = "{{entry[8]}} {{entry[9]}} {{entry[10]}} {{entry[5]}} {{entry[7]}}" class = "ratingsbutton_friends" >FIND FRIENDS</a>
     </li>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry[3]}}</p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Closing time : {{entry[4]}}</p>
@@ -118,66 +186,135 @@
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Estimated Budget : {{entry[7]}} </p>
 	
 
-<!-- The Modal -->
-<div id="myModal" class="modal">
+<!-- The Modal_Friends -->
+<div id="myModal_friends" class="modal_friends">
 
   <!-- Modal content -->
-  <div class="modal-content">
-    <div class="modal-header">
-      <span class="close">×</span>
+  <div class="modal-content_friends">
+    <div class="modal-header_friends">
+      <span class="close_friends">×</span>
+      <h2>Here are your friends who are interested in this activity:</h2>
+    </div>
+    <div class="modal-body_friends">
+      <ul id="myulID_friends"></ul>
+    </div>
+    <div class="modal-footer_friends">
+      <h3>Good friends are like stars. You don't always see them, but you know they're always there.</h3>
+    </div>
+  </div>
+
+</div>
+
+<!-- The Modal_Equipment -->
+<div id="myModal_equipment" class="modal_equipment">
+
+  <!-- Modal content -->
+  <div class="modal-content_equipment">
+    <div class="modal-header_equipment">
+      <span class="close_equipment">×</span>
       <h2>Gears required for this activity include:</h2>
     </div>
-    <div class="modal-body">
-      <ul id="myulID"></ul>
+    <div class="modal-body_equipment">
+      <ul id="myulID_equipment"></ul>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer_equipment">
       <h3>DoodleMeet wishes you a pleasant recreation!</h3>
     </div>
   </div>
 
-</div>   {% endfor %}
-	<input type="hidden" id="myVar" name="variable" value="{{ mynames[0][0] }}">    
+</div>   {% endfor %} 
 </ul>
 <script>
-var modal = document.getElementById('myModal');
-var span = document.getElementsByClassName("close");
-for(var i=0;i<span.length;i++)
-	span[i].onclick = function(){
-	modal.style.display = "none";
-	var ul = document.getElementById("myulID");
+var modal_friends = document.getElementById('myModal_friends');
+var span_friends = document.getElementsByClassName("close_friends");
+for(var i=0;i<span_friends.length;i++)
+	span_friends[i].onclick = function(){
+	modal_friends.style.display = "none";
+	var ul = document.getElementById("myulID_friends");
+	while( ul.firstChild ){
+	  ul.removeChild( ul.firstChild );
+}
+}
+
+var modal_equipment = document.getElementById('myModal_equipment');
+var span_equipment = document.getElementsByClassName("close_equipment");
+for(var i=0;i<span_equipment.length;i++)
+	span_equipment[i].onclick = function(){
+	modal_equipment.style.display = "none";
+	var ul = document.getElementById("myulID_equipment");
 	while( ul.firstChild ){
 	  ul.removeChild( ul.firstChild );
 }
 }
 
 window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-	var ul = document.getElementById("myulID");
+    if (event.target == modal_friends) {
+        modal_friends.style.display = "none";
+	var ul = document.getElementById("myulID_friends");
 	while( ul.firstChild ){
 	  ul.removeChild( ul.firstChild );
 }
     }
 }
+window.onclick = function(event) {
+    if (event.target == modal_equipment) {
+        modal_equipment.style.display = "none";
+	var ul = document.getElementById("myulID_equipment");
+	while( ul.firstChild ){
+	  ul.removeChild( ul.firstChild );
+}
+    }
+}
+
 </script>
   <script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
   <script type="text/javascript">
-$(".ratingsbutton").click(function(){
+$(".ratingsbutton_equipment").click(function(){
 	console.log(this.name);
-	functioncalled(Number(this.name));
+	functioncalled_equipment(Number(this.name));
 });
 
-function functioncalled(activityID){
-	$.getJSON($SCRIPT_ROOT + "/find_activitygear",{query:activityID}).done(function(data){
-	var ul = document.getElementById("myulID");
+$(".ratingsbutton_friends").click(function(){
+	console.log(this.name);
+	functioncalled_friends(this.name);
+});
+
+
+function functioncalled_friends(findFriendData){
+	$.getJSON($SCRIPT_ROOT + "/find_activityfriends",{query:findFriendData}).done(function(data){
+	var ul = document.getElementById("myulID_friends");
 
 	for (var i = 0; i < data.length; i++){
 	var li = document.createElement("li");	
+	li.style.width="40px";
+	li.style.height="40px";
+	li.style.color="#0099ff";
+	li.style.fontSize="30px";
+
 	li.appendChild(document.createTextNode(data[i]));
 	ul.appendChild(li);
 	}
 	
-	modal.style.display = "block";
+	modal_friends.style.display = "block";
+});
+}
+
+
+function functioncalled_equipment(activityID){
+	$.getJSON($SCRIPT_ROOT + "/find_activitygear",{query:activityID}).done(function(data){
+	var ul = document.getElementById("myulID_equipment");
+
+	for (var i = 0; i < data.length; i++){
+	var li = document.createElement("li");	
+	li.style.width="40px";
+	li.style.height="40px";
+	li.style.color="#ff3333";
+	li.style.fontSize="30px";
+	li.appendChild(document.createTextNode(data[i]));
+	ul.appendChild(li);
+	}
+	
+	modal_equipment.style.display = "block";
 });
 }
 

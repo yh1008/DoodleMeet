@@ -218,7 +218,7 @@ def display_interest_list():
 	
 	username_map = {"emily" : 1, "dhruv" : 8}
 	uid = username_map[str(session['username'])]
-	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
+	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
 	return render_template('show_interest_list.html', 
                             mynames = entry_by_location1, 
                             
@@ -289,7 +289,40 @@ def find_activitygear():
 	return Response(json.dumps(l), mimetype='application/json')
 
 
+@app.route('/find_activityfriends')
+def find_activityfriends():
+	print ("Good NEWS!!")
+	username_map = {"emily" : 1, "dhruv" : 8}
+	uid = username_map[str(session['username'])]
+	activityID = request.args.get('query')
+	print type(activityID)
+	activityID = str(activityID)
+	print type(activityID)
+	words = activityID.split(" ")
+	print words
+	print (g.conn.execute('select * from interest'))
+	print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+	getfriends= g.conn.execute("select firstname, lastname FROM users u JOIN interest i ON u.uid = i.usr WHERE activity_category = %d AND activity_subcategory = %d AND pid = %d AND start_time :: date = to_timestamp('%s'::text, 'YYYY-MM-DD') AND budget <= %d + 10 AND budget >= %d - 10 AND i.usr <> %d" %(int(words[0]), int(words[1]), int(words[2]), '2016-11-15', 20, 20, int(uid))).fetchall()
+	print getfriends
+	print(len(getfriends))
+	print "got nothing man"
+	l = []
+	if len(getfriends)!=0:
+		for i in getfriends[0]:
+			l.append(str(i))
+	return Response(json.dumps(l), mimetype='application/json')
+  
+  
+  
 
+
+
+# if getfriends is not None:
+#     l = []
+#     for i in getfriends:
+#       l.append(str(i))
+#   return Response(json.dumps(l), mimetype='application/json')
+  
 @app.route('/add', methods=['POST'])
 def add_entry():
     if not session.get('logged_in'):
