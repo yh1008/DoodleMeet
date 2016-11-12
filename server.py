@@ -281,12 +281,28 @@ def find_activitygear():
 	activityID = request.args.get('query', 0, type=int)
 	print(activityID)
 	print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-	getgear= g.conn.execute('select name from gears INNER JOIN gearstocarry ON gears.gid=gearstocarry.gid where gearstocarry.aid=%d' %activityID).fetchall()
-	l=[]
+	getgear= g.conn.execute('select g.name,s.name,s.city from gears g INNER JOIN gearstocarry gc ON g.gid=gc.gid INNER JOIN travelitemshop ts ON gc.gid=ts.gear INNER JOIN shops s ON s.sid=ts.sid where gc.aid=%d' %activityID).fetchall()
+	print getgear
+	print getgear[0][0]
+	x=[[] for i in range(len(getgear))]
+	print x
+	print x[0]
+	print x
 	for i in getgear:
-		l.append(str(i[0]))
-	print l
-	return Response(json.dumps(l), mimetype='application/json')
+		print i[0]
+		for j in x:
+			if not j:
+				j.append(i[0])
+				j.append(i[1] + ", " + i[2])
+				break
+			elif j[0] == i[0]:
+				j.append(i[1] + ", " + i[2])
+				break
+			
+	print x
+	gearData = [ a for a in x if a!=[]]
+	print gearData
+	return Response(json.dumps(gearData), mimetype='application/json')
 
 
 @app.route('/find_activityfriends')
@@ -314,7 +330,6 @@ def find_activityfriends():
   
   
   
-
 
 
 # if getfriends is not None:

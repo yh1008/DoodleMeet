@@ -286,8 +286,6 @@ function functioncalled_friends(findFriendData){
 
 	for (var i = 0; i < data.length; i++){
 	var li = document.createElement("li");	
-	li.style.width="40px";
-	li.style.height="40px";
 	li.style.color="#0099ff";
 	li.style.fontSize="30px";
 
@@ -303,15 +301,20 @@ function functioncalled_friends(findFriendData){
 function functioncalled_equipment(activityID){
 	$.getJSON($SCRIPT_ROOT + "/find_activitygear",{query:activityID}).done(function(data){
 	var ul = document.getElementById("myulID_equipment");
-
 	for (var i = 0; i < data.length; i++){
 	var li = document.createElement("li");	
-	li.style.width="40px";
-	li.style.height="40px";
 	li.style.color="#ff3333";
 	li.style.fontSize="30px";
-	li.appendChild(document.createTextNode(data[i]));
+	li.appendChild(document.createTextNode(data[i][0]));
+	var subul = document.createElement("ul");
+	for (var j =1; j < data[i].length; j++){
+	var subli = document.createElement("li");
+	subli.appendChild(document.createTextNode(data[i][j]));
+	subli.style.fontSize="20px"
+	subul.appendChild(subli);
+	}
 	ul.appendChild(li);
+	ul.appendChild(subul);
 	}
 	
 	modal_equipment.style.display = "block";
