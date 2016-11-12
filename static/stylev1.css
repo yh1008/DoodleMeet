@@ -5,6 +5,9 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+.form-inline{
+  margin: 4px 2px;
+}
 .dropdown {
     font-size: 18px
 } 

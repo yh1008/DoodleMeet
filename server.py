@@ -13,7 +13,8 @@ import json
 import flask
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from sqlalchemy.dialects.postgresql import insert
+import hashlib
+#from sqlalchemy.dialects.postgresql import insert
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -26,7 +27,6 @@ app.config.from_object(__name__)
 DATABASEURL = "postgresql://yh2901:sy38d@104.196.175.120/postgres"
 engine = create_engine(DATABASEURL)
 
-
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'doodlemeet.db'),
@@ -38,6 +38,8 @@ app.config.update(dict(
     PASSWORD2='emily'
       
 ))
+
+
 app.config.from_envvar('DOODLEMEET_SETTINGS', silent=True)
 
 @app.before_request
@@ -104,10 +106,9 @@ def handler(name):
                             quote = quote,
                             log_info = log_info)
 
-@app.route('/getratings/<activity_subcategory>/<pid>/<aid>/<aaid>')
+@app.route('/rating_display/<activity_subcategory>/<pid>/<aid>/<aaid>')
 def rating_display(activity_subcategory, pid, aid, aaid):
-    username_map = {"emily" : 1, "dhruv" : 8}
-    uid = username_map[str(session['username'])]
+    uid = session['uid']
     print ("user name: ", session['username'])
     print ("******************I am in rating_display *********************************")
     print ("pid,aid, aaid: ", pid, aid, aaid)
@@ -146,8 +147,11 @@ def rating_display(activity_subcategory, pid, aid, aaid):
     most_fun_routes = g.conn.execute('SELECT a.n FROM (SELECT route_number, rt.name n, count(*) counts FROM \
                            ratefunroute r JOIN friendship f ON r.uid = f.friend JOIN route rt ON rt.rid = r.route_number \
                            WHERE f.usr = %d AND pid = %d AND aid = %d AND aaid = %d GROUP BY route_number, rt.name ORDER BY counts desc \
-                           limit 1)a ;'%(uid, int(pid), int(aid), int(aaid))).fetchall()[0][0]
-    print ("routes", routes)
+                           limit 1)a ;'%(uid, int(pid), int(aid), int(aaid))).fetchall()
+    if (len(most_fun_routes) == 0):
+        most_fun_routes = "the potential routes to this places are"
+    else:
+        most_fun_routes = "the majority of your friends think {} is the most fun route, and the potential other routes are".format(most_fun_routes[0][0])
     print ("most_fun_routes: ", most_fun_routes)
     return render_template('show_ratings.html', 
     						pid = pid,
@@ -163,7 +167,7 @@ def rating_display(activity_subcategory, pid, aid, aaid):
                             log_info = log_info)
 
 #, activity_subcategory = activity_subcategory, pid = pid, start_time = mynames[3], end_time = mynames[4], budget = pid)
-@app.route('/getloc/<name>')
+@app.route('/loc_display/<name>')
 def loc_display(name):
     print ("******************I am in loc_display *********************************")
     location_table_keys = ["pid", 'aid', 'aaid', 'open_time', 'close_time', 'state', 'city', 'name']
@@ -191,35 +195,33 @@ def show_entries():
     else:
         log_info = " Login"
     print ("logged in : ",session['logged_in'])
-    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7")
+    print("****************************************I am in show_sentries*******************************************")
     return render_template('show_entriesv1.html', log_info = log_info)
 
 @app.route('/added_time/<aid>/<aaid>/<pid>', methods=['POST','GET'])
 def added_time(aid, aaid, pid):
-	print("****************************************I am in Added_Time*******************************************")
-	startdatetime = str(request.form['startdatetime'])
-	enddatetime = str(request.form['enddatetime'])
-	startdate_and_time=startdatetime.split('T')
-	startdatetime=startdate_and_time[0]+ ' ' + startdate_and_time[1]
-	enddate_and_time=enddatetime.split('T')
-	enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
-	budget=int(request.form['budget'])
-	username_map = {"emily" : 1, "dhruv" : 8}
-	uid = username_map[str(session['username'])]
-	entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), %d)" %(int(uid), int(aid), int(aaid), int(pid), startdatetime, enddatetime, budget))
-	return redirect(url_for('show_entries'))
+    print("****************************************I am in Added_Time*******************************************")
+    startdatetime = str(request.form['startdatetime'])
+    enddatetime = str(request.form['enddatetime'])
+    startdate_and_time=startdatetime.split('T')
+    startdatetime=startdate_and_time[0]+ ' ' + startdate_and_time[1]
+    enddate_and_time=enddatetime.split('T')
+    enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
+    budget=int(request.form['budget'])
+    uid = session['uid']
+    entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), %d)" %(int(uid), int(aid), int(aaid), int(pid), startdatetime, enddatetime, budget))
+    return redirect(url_for('show_entries'))
     
     
 
 @app.route('/interests')
 def display_interest_list():
-	if not session.get('logged_in'):
-		abort(401)
-	
-	username_map = {"emily" : 1, "dhruv" : 8}
-	uid = username_map[str(session['username'])]
-	entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
-	return render_template('show_interest_list.html', 
+    if not session.get('logged_in'):
+        abort(401)
+    uid = session['uid']
+    print ("uid in interest: ", uid)
+    entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
+    return render_template('show_interest_list.html', 
                             mynames = entry_by_location1, 
                             
                             )
@@ -241,8 +243,7 @@ def add_comment():
     print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
     query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
                 VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
-    username_map = {"emily" : 1, "dhruv" : 8}
-    uid = username_map[str(session['username'])]
+    uid = session['uid']
     score = request.form['rating']
     print ("rating: ", score)
     g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score=score)
@@ -272,7 +273,7 @@ def add_route_rating():
 
 @app.route('/trial')
 def trial():
-	print "3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"
+	print "***********************I am in trial ***************"
 	myDict={'a' : 2, 'b' : 3}
 	return flask.jsonify(**myDict)
 
@@ -280,7 +281,7 @@ def trial():
 def find_activitygear():
 	activityID = request.args.get('query', 0, type=int)
 	print(activityID)
-	print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+	print("***********************I am in find_activitygear ***************")
 	getgear= g.conn.execute('select name from gears INNER JOIN gearstocarry ON gears.gid=gearstocarry.gid where gearstocarry.aid=%d' %activityID).fetchall()
 	l=[]
 	for i in getgear:
@@ -292,8 +293,7 @@ def find_activitygear():
 @app.route('/find_activityfriends')
 def find_activityfriends():
 	print ("Good NEWS!!")
-	username_map = {"emily" : 1, "dhruv" : 8}
-	uid = username_map[str(session['username'])]
+	uid = session['uid']
 	activityID = request.args.get('query')
 	print type(activityID)
 	activityID = str(activityID)
@@ -301,7 +301,7 @@ def find_activityfriends():
 	words = activityID.split(" ")
 	print words
 	print (g.conn.execute('select * from interest'))
-	print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+	print("***********************I am in find_activityfriends ***************")
 	getfriends= g.conn.execute("select firstname, lastname FROM users u JOIN interest i ON u.uid = i.usr WHERE activity_category = %d AND activity_subcategory = %d AND pid = %d AND start_time :: date = to_timestamp('%s'::text, 'YYYY-MM-DD') AND budget <= %d + 10 AND budget >= %d - 10 AND i.usr <> %d" %(int(words[0]), int(words[1]), int(words[2]), '2016-11-15', 20, 20, int(uid))).fetchall()
 	print getfriends
 	print(len(getfriends))
@@ -338,25 +338,91 @@ def add_entry():
 @app.route('/', methods=['GET', 'POST'])
 def login():
     error = None
-    print "logged in DHruv"
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME1'] and request.form['username'] != app.config['USERNAME2']:
+        username =  g.conn.execute(text("select username from users where username = :username"), username = request.form['username'] ).fetchall()
+        password = g.conn.execute(text("select password from users where username = :username"), username = request.form['username'] ).fetchall()
+        hashed_password = hashlib.md5(str(request.form['password'])).hexdigest()
+        
+        if len(username) == 0:
+            print ("username {}", username)
             error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD1'] and request.form['password'] != app.config['PASSWORD2']:
-            error = 'Invalid password'
         else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            session['username'] = request.form['username']
-            return redirect(url_for('show_entries'))
-    return render_template('login.html', error=error)
+            #there is this user but the password does not match
+            password = password[0][0]
+            if hashed_password != password:
+                print ("hashed password: {}".format( hashed_password ))
+                print ("table password: {}".format(password))
+                print ("password {}", format(str(request.form['password'])))
+                error = 'Invalid password'
+            else: #there is a user and matching password
+                username = username[0][0]
+                print ("username: {}", username)
+                print ("hashed password {}", hashed_password)
+                session['logged_in'] = True
+                #flash('You were logged in')
+                uid = g.conn.execute(text("select uid from users where username = :username"), username = username ).fetchall()[0][0]
+                session['uid'] = uid
+                print ("uni: {}".format(uid))
+                return redirect(url_for('show_entries'))
+    return render_template('login.html', error = error)
 
 
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
-    flash('You were logged out')
+    #flash('You were logged out')
     return redirect(url_for('login'))
+
+
+@app.route('/enter_user_info', methods = ['GET', 'POST'])
+def enter_user_info(): 
+    error = None
+    if request.method == 'POST':
+        firstname = str(request.form['firstname'])
+        lastname = str(request.form['lastname'])
+        gender = str(request.form['gender'])
+        age = str(request.form['age'])
+        print (firstname, lastname, gender, age)
+        if len(firstname) == 0:
+            print ("please enter firstname")
+            error = "please enter firstname"
+        elif len(lastname) == 0:
+            print ("please enter firstname")
+            error = "please enter lastname"
+        elif len(age) == 0:
+            print ("please enter firstname")
+            error = "please enter age"
+        elif len(gender) == 0:
+            print ("please enter firstname")
+            error = "please enter gender"
+        else:
+            return redirect(url_for('show_entries'))
+    #display the form for users to enter their information 
+    return render_template("enter_user_info.html", error = error)
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    error = None
+    if request.method == 'POST':
+        username = str(request.form['username'])
+        print ("username: {}".format(username))
+        password = str(request.form['password'])
+        print ("password: {}".format(password))
+        hashed_password = hashlib.md5(str(request.form['password'])).hexdigest()
+        #see if the username is already registered 
+        username_exists = g.conn.execute(text("select username from users where username = :username"), username = username).fetchall()
+        if len(username_exists) != 0:
+            error = "username already exists, please be creative and come up with a new one ;)"
+        else: #insert username and password into the users table 
+            max_uid = g.conn.execute(text("select max(uid) from users")).fetchall()[0][0]
+            print ("max_uid {}".format(max_uid))
+            g.conn.execute(text('INSERT INTO users(uid, username, password)\
+                VALUES (:uid, :username, :password)'), uid = max_uid+1, username = username, password = hashed_password)
+            print ( g.conn.execute(text("select max(uid) from users")).fetchall()[0][0])
+            session['logged_in'] = True
+            return redirect(url_for('enter_user_info'))
+    return render_template('signup.html', error = error)
+    
 
 '''
 with app.app_context():
