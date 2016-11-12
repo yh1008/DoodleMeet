@@ -377,6 +377,8 @@ def logout():
 @app.route('/enter_user_info', methods = ['GET', 'POST'])
 def enter_user_info(): 
     error = None
+    uid = session['uid']
+    print ("enter_user_info uid: ", uid)
     if request.method == 'POST':
         firstname = str(request.form['firstname'])
         lastname = str(request.form['lastname'])
@@ -396,9 +398,39 @@ def enter_user_info():
             print ("please enter firstname")
             error = "please enter gender"
         else:
+            g.conn.execute(text("UPDATE users SET firstname = :firstname, lastname = :lastname, gender = :gender, age = :age WHERE uid = \
+            :uid"), firstname = firstname, lastname = lastname, age = age, gender = gender, uid = uid)
             return redirect(url_for('show_entries'))
-    #display the form for users to enter their information 
-    return render_template("enter_user_info.html", error = error)
+    #display the form for users to enter their information
+    firstname1 = g.conn.execute(text("SELECT firstname from users WHERE uid = :uid"), uid = uid).fetchall()
+    lastname1 = g.conn.execute(text("SELECT lastname from users WHERE uid = :uid"), uid = uid).fetchall()
+    age1 = g.conn.execute(text("SELECT age from users WHERE uid = :uid"), uid = uid).fetchall()
+    gender1 = g.conn.execute(text("SELECT gender from users WHERE uid = :uid"), uid = uid).fetchall()
+    print ("firstname", firstname1)
+    if (firstname1[0][0] == None):
+        firstname1 = "Jane"
+    else:
+        firstname1 = firstname1[0][0]
+        print ("firstname", firstname1)
+    if (lastname1[0][0] == None ):
+        lastname1 = "Doe"
+    else:
+        lastname1 = lastname1[0][0]   
+    if (age1[0][0] == None):
+        age1 = "25" 
+    else:
+        age1 = age1[0][0]
+    if (gender1[0][0] == None):
+        gender1 = "female"
+    else:
+        gender1= gender1[0][0]
+    
+    return render_template("enter_user_info.html", 
+                                error = error,
+                                firstname = firstname1,
+                                lastname = lastname1,
+                                age = age1,
+                                gender = gender1)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -420,6 +452,8 @@ def signup():
                 VALUES (:uid, :username, :password)'), uid = max_uid+1, username = username, password = hashed_password)
             print ( g.conn.execute(text("select max(uid) from users")).fetchall()[0][0])
             session['logged_in'] = True
+            session['uid'] = max_uid+1
+            print ("just sign up uni: {}".format(max_uid+1))
             return redirect(url_for('enter_user_info'))
     return render_template('signup.html', error = error)
     
