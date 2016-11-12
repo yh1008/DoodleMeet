@@ -49,6 +49,29 @@
     </ul>
   </div>
 </nav>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<form class="form-inline" action="{{ url_for('enter_user_info') }}" method="POST" >
+  <div class="form-group">
+    <label for="formGroupExampleInput">Firstname</label>
+    <input type="text" class="form-control" id=firname name=firstname placeholder={{firstname}}>
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">Lastname</label>
+    <input type="text" class="form-control" id=lastname name=lastname  placeholder={{lastname}}>
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">Gender</label>
+    <input type="text" class="form-control" id=gender name=gender placeholder={{gender}}>
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">Age</label>
+    <input type="text" class="form-control" id=age name=age  placeholder={{age}}>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit Info</button>
+</form>
+
+
 
 </body>
 </html>
+

@@ -183,7 +183,7 @@
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; City : {{entry[2]}}</p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; State : {{entry[1]}} </p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Expected Duration : {{entry[5]}} - {{entry[6]}} </p>
-    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Estimated Budget : {{entry[7]}} </p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Your Estimated Budget : {{entry[7]}} </p>
 	
 
 <!-- The Modal_Friends -->
@@ -238,7 +238,7 @@ for(var i=0;i<span_friends.length;i++)
 
 var modal_equipment = document.getElementById('myModal_equipment');
 var span_equipment = document.getElementsByClassName("close_equipment");
-for(var i=0;i<span_equipment.length;i++)
+for(var i = 0;i<span_equipment.length;i++)
 	span_equipment[i].onclick = function(){
 	modal_equipment.style.display = "none";
 	var ul = document.getElementById("myulID_equipment");
