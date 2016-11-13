@@ -187,10 +187,17 @@
         {% for info in entry[11] %}
         <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; ticket: {{info[0]}} </p>
         <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; ticket price : {{info[1]}} </p>
-        <div class = "ticket button">
-            <button type="submit" class="btn btn-info"><a href = "{{ url_for('show_order_history', price = info[1]) }}"> Order this ticket</button></a>
-        </div>
+        <form class="form-inline" action="{{ url_for('show_order_history') }}" method="POST" >
+            <div class = "ticket button">
+                <input type="hidden" name="tid" value={{info[2]}}>
+                 <input type='hidden' name ="price" value={{info[1]}}>
+                <button type="submit" class="btn btn-info"> Order this ticket</button>
+            </div>
+            
+            
+        
 	    {% endfor %} 
+        </form>
 
 <!-- The Modal_Friends -->
 <div id="myModal_friends" class="modal_friends">
