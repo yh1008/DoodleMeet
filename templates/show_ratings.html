@@ -73,7 +73,26 @@
   </ul>
 </div>
 <br><br>
+<div class="dropdown open">
+ <form method="POST" action="/rate_route">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    You can rate routes for this place by clicking on the following
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      {% for route in all_routes %}
+     <li><input type="text" id="routename" name="routename" value={{route[1]}} /></li>
+     <input type="hidden" id="routeid" name="rouetid" value={{route[0]}} />
+     <input type="hidden" id="pid" name="pid" value={{pid}} />
+     <input type="hidden" id="aid" name="aid" value={{aid}} />
+     <input type="hidden" id="aaid" name="aaid" value={{aaid}} />
+     <input type="hidden" id="activity_subcategory" name="activity_subcategory" value={{activity_subcategory}}/>
+     <button type="submit" class="btn btn-default">Submit</button>
 
+
+     {% endfor %}
+  </div>
+  </form>
+</div>
 
 <div class = "inputcontainer">
     <form method="POST" action="/add_comment/activity">

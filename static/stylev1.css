@@ -5,6 +5,10 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+.order-history{
+   width:10px;
+  display: block;
+}
 .ticket button{
   margin-left: 200px;
 }
