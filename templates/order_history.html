@@ -41,8 +41,7 @@
         </ul>
       </li>
       <li><a href="{{ url_for('display_interest_list') }}">My Interest List</a></li>
-      <li><a href="{{ url_for('enter_user_info') }}">Change My Info</a></li>
-      <li><a href="{{ url_for('search_friends') }}">Search New Friend</a></li>
+      <li><a href="{{ url_for('enter_user_info') }}">Change my info</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <!--<li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li> -->
@@ -50,6 +49,34 @@
     </ul>
   </div>
 </nav>
+{% if info %}<p class=error><strong>Hey:</strong> {{ info }}{% endif %}
+<label for="order-history">Your order history: </label>
+<form class="form-inline" >
+  {% for entry in orderhistory %}
+  <div class="form-group">
+    <label for="formGroupExampleInput">oid:</label>
+    <p class="list-group-item-text" >{{entry[0]}}</p><br>
+    
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">uid:</label>
+     <p class="list-group-item-text">{{entry[1]}}</p><br>
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">tid:</label>
+     <p class="list-group-item-text">{{entry[2]}}</p><br>
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">time:</label>
+     <p class="list-group-item-text">{{entry[3]}}</p><br>
+  </div>
+
+  {% endfor %}
+
+</form>
+
+
 
 </body>
 </html>
+

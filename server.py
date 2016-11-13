@@ -221,8 +221,27 @@ def display_interest_list():
     uid = session['uid']
     print ("uid in interest: ", uid)
     entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
+    entry_by_location = []
+    newentry = []
+    for entry in entry_by_location1:
+        newentry = []
+        print (entry[8], entry[9], entry[10])
+        ticket_info = g.conn.execute(text('SELECT name, price FROM ticketrequired WHERE pid = :pid AND aid = :aid AND aaid = :aaid'), pid = int(entry[10]), aid = int(entry[8]), aaid = int(entry[9])).fetchall()
+        if len(ticket_info) == 0:
+            ticket_info = [None, None]
+        else:
+            ticket_info = ticket_info
+            print (ticket_info)
+        for i in range (11):
+            newentry.append(entry[i])
+        newentry.append(ticket_info)
+        print ("new entry: ", newentry)
+        entry_by_location.append(newentry)
+        print ("11: ", newentry[11])
+    print ("entry by location: ", entry_by_location)
+    
     return render_template('show_interest_list.html', 
-                            mynames = entry_by_location1, 
+                            mynames = entry_by_location, 
                             
                             )
 
@@ -331,23 +350,81 @@ def find_activityfriends():
   
   
 
+@app.route('/show_order_history/<price>', methods = ['GET'])
+def show_order_history(price = None):
+    info = None
+    print ("price: ", price)
+    uid = session['uid']
+    if price != None:
+        fund = g.conn.execute(text('SELECT fund from users WHERE uid = :uid'), uid = uid).fetchall()[0][0]
+        print ("fund: ", fund)
+        remain = float(fund) - float(price)
+        print ("remain: ", remain)
+        if (remain > 0 ):
+            info = "your successfully purchased the ticket, and your remaining budget is ${}".format(remain)
+            print (info)
+            g.conn.execute(text('UPDATE users SET fund =:fund WHERE uid = :uid'), fund = remain, uid = uid) 
+            #add entry in order history!
+        else: 
+            info = "Sorry, you have insuffient budget for this purchase! The budget you have is ${}".format(float(fund))
+            print (info)
+        orderhistory = g.conn.execute(text('SELECT * FROM orderhistory WHERE uid = :uid'), uid = uid).fetchall() 
+        print ("order history: ", orderhistory)
+        return render_template("order_history.html", info = info, orderhistory = orderhistory)
+    else: 
+        orderhistory = g.conn.execute(text('SELECT * FROM orderhistory WHERE uid = :uid'), uid = uid).fetchall() 
+        print ("order history: ", orderhistory)
+        
+        return render_template("order_history.html", orderhistory = orderhistory)
 
-# if getfriends is not None:
-#     l = []
-#     for i in getfriends:
-#       l.append(str(i))
-#   return Response(json.dumps(l), mimetype='application/json')
-  
-@app.route('/add', methods=['POST'])
-def add_entry():
+@app.route('/add_friends', methods = ['POST', 'GET'])
+def add_friends(): 
+    error = None
+    info = None
+    if request.method == 'POST':
+        userid = session['uid']
+        print ("userid ", userid)
+        friendid = int(request.form['uid'])
+        print ("friendid", friendid)
+        #check if they are already friends!!!!!!!!!!!!!
+        friendship_exists =  g.conn.execute(text('SELECT * FROM friendship WHERE usr = :uid and friend = :friend'),  uid = userid, friend = friendid).fetchall()
+        print ("exist? " ,friendship_exists)
+        if len(friendship_exists) != 0:
+            error = "Sorry, looks like this person is already your friend"
+            print (error)
+        else:
+            max_fid = g.conn.execute("SELECT max(fid) FROM friendship").fetchall()[0][0]
+            fid = max_fid+1
+            g.conn.execute(text('INSERT INTO friendship (fid, usr, friend) VALUES (:fid, :uid, :friendid)'), fid = fid, uid = userid, friendid = friendid)
+            print (g.conn.execute('select max(fid) from friendship').fetchall())
+            fullname = g.conn.execute(text("select firstname, lastname from users where uid = :uid"), uid = friendid ).fetchall()[0]
+            info = "Successfully added {} {} to your friend list! ".format(fullname[0], fullname[1])
+    return render_template('search_friends.html', info = info)
+
+
+@app.route('/search_friends', methods=['POST', 'GET'])
+def search_friends():
+    error = None
     if not session.get('logged_in'):
         abort(401)
-    db = get_db()
-    db.execute('insert into entries (title, text) values (?, ?)',
-               [request.form['title'], request.form['text']])
-    db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entriesv1'))
+    if request.method == 'POST':
+        f_firstname = str(request.form['firstname'])
+        f_lastname = str(request.form['lastname'])
+        if (len(f_firstname) == 0 or len(f_lastname)) == 0:
+            error = "Sorry, you have to know the full name of your friends"
+            print (error)
+        else:
+            f_firstname = f_firstname.capitalize()
+            f_lastname = f_lastname.capitalize()
+            fullnames = g.conn.execute(text('SELECT firstname, lastname, gender, age, uid FROM users WHERE firstname = :firstname and lastname = :lastname'), firstname = f_firstname, lastname = f_lastname).fetchall()
+            print (fullnames)
+            if len(fullnames) == 0:
+                error = "Sorry, {} {} is not registered on Doodle Meet yet!".format(f_firstname, f_lastname)
+            else:
+                fullnames = fullnames
+                print (fullnames)
+                return render_template('add_friends.html', fullnames = fullnames)
+    return render_template('search_friends.html', error = error)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -395,8 +472,8 @@ def enter_user_info():
     uid = session['uid']
     print ("enter_user_info uid: ", uid)
     if request.method == 'POST':
-        firstname = str(request.form['firstname'])
-        lastname = str(request.form['lastname'])
+        firstname = str(request.form['firstname']).capitalize()
+        lastname = str(request.form['lastname']).capitalize()
         gender = str(request.form['gender'])
         age = str(request.form['age'])
         print (firstname, lastname, gender, age)
@@ -415,7 +492,7 @@ def enter_user_info():
         else:
             g.conn.execute(text("UPDATE users SET firstname = :firstname, lastname = :lastname, gender = :gender, age = :age WHERE uid = \
             :uid"), firstname = firstname, lastname = lastname, age = age, gender = gender, uid = uid)
-            return redirect(url_for('show_entries'))
+            return redirect(url_for('search_friends'))
     #display the form for users to enter their information
     firstname1 = g.conn.execute(text("SELECT firstname from users WHERE uid = :uid"), uid = uid).fetchall()
     lastname1 = g.conn.execute(text("SELECT lastname from users WHERE uid = :uid"), uid = uid).fetchall()

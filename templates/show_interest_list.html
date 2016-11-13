@@ -184,7 +184,13 @@
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; State : {{entry[1]}} </p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Expected Duration : {{entry[5]}} - {{entry[6]}} </p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Your Estimated Budget : {{entry[7]}} </p>
-	
+        {% for info in entry[11] %}
+        <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; ticket: {{info[0]}} </p>
+        <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; ticket price : {{info[1]}} </p>
+        <div class = "ticket button">
+            <button type="submit" class="btn btn-info"><a href = "{{ url_for('show_order_history', price = info[1]) }}"> Order this ticket</button></a>
+        </div>
+	    {% endfor %} 
 
 <!-- The Modal_Friends -->
 <div id="myModal_friends" class="modal_friends">

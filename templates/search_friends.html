@@ -42,7 +42,6 @@
       </li>
       <li><a href="{{ url_for('display_interest_list') }}">My Interest List</a></li>
       <li><a href="{{ url_for('enter_user_info') }}">Change My Info</a></li>
-      <li><a href="{{ url_for('search_friends') }}">Search New Friend</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <!--<li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li> -->
@@ -50,6 +49,23 @@
     </ul>
   </div>
 </nav>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+{% if info %}<p class=error><strong>Hey! </strong> {{ info }}{% endif %}
+<label for="formGroupExampleInput">Please enter the following information about your friend to start the search: </label>
+<form class="form-inline" action="{{ url_for('search_friends') }}" method="POST" >
+  <div class="form-group">
+    <label for="formGroupExampleInput">Firstname:</label>
+    <input type="text" class="form-control" id=firname name=firstname >
+  </div>
+  <div class="form-group">
+    <label for="formGroupExampleInput2">Lastname:</label>
+    <input type="text" class="form-control" id=lastname name=lastname>
+  </div>
+  <button type="submit" class="btn btn-primary">Search this friend</button>
+</form>
+
+
 
 </body>
 </html>
+
