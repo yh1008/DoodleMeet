@@ -5,6 +5,9 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+.ticket button{
+  margin-left: 200px;
+}
 .form-inline{
   margin: 4px 2px;
 }
