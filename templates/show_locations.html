@@ -31,7 +31,7 @@
     {% for entry in mynames %}
     <li class="list-group-item">
         <p style="color:#6699ff;font-size:30px">{{ entry[7] }}</p>
-        <a href = "{{ url_for ('rating_display', activity_subcategory = name, pid = entry[0], aid =entry[1], aaid = entry[2] ) }}" class = "ratingsbutton">GET RATINGS</a>
+        <a href = "{{ url_for ('rating_display', activity_subcategory = name, pid = entry[0], aid =entry[1], aaid = entry[2]) }}" class = "ratingsbutton">GET RATINGS</a>
 
     </li>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry[3]}}</p>
