@@ -109,8 +109,7 @@ def handler(name):
 
 @app.route('/rating_display/<activity_subcategory>/<pid>/<aid>/<aaid>')
 def rating_display(activity_subcategory, pid, aid, aaid):
-    uid = session['uid']
-    print ("user name: ", session['username'])
+    uid = session['uid')
     print ("******************I am in rating_display *********************************")
     print ("pid,aid, aaid: ", pid, aid, aaid)
     if (str(aid) == 'static'):
