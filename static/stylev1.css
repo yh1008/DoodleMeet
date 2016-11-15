@@ -10,8 +10,19 @@ html {
 .home-interest{
   background-image: url(doodlemeetbackimage1.jpg) no-repeat center center fixed;
 }
+.routes{
+   font-size:small;
+}
+.line-separator{
+  height:1px;
+  background:#717171;
+  border-bottom:0.5px solid #313030;
+}
+.mycomment{
+   margin-top:100px;
+}
 .order-history{
-   width:10px;
+  width:10px;
   display: block;
 }
 .ticket button{

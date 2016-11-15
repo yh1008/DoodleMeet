@@ -175,8 +175,13 @@ def rating_display(activity_subcategory, pid, aid, aaid):
             print ("aaid in rate_route", aaid)
             routeid = request.form['routeid']
             print ("routeid in rate_route", routeid)
-            print ("routeid ", routeid)
+            print ("routename in rate_route", request.form['routename'])
             activity_subcategory = request.form['activity_subcategory']
+            route_exists = g.conn.execute(text("SELECT * FROM modeoftransport WHERE route_number = :routeid AND \
+                                     pid = :pid AND aid = :aid AND aaid = :aaid"), routeid = routeid, pid = pid, aid = aid, aaid = aaid).fetchall()
+            print ("route exists: ", route_exists)
+            if len(route_exists) == 0:
+                g.conn.execute(text('INSERT INTO modeoftransport (route_number, pid, aid, aaid) VALUES (:routeid, :pid, :aid, :aaid)'),routeid = routeid, pid = pid, aid = aid, aaid = aaid)
             g.conn.execute(text('INSERT INTO ratefunroute (rid, uid, pid, aid, aaid, route_number, score) VALUES (:rid, :uid, :pid, :aid, :aaid, :routeid, 1)'),
                 rid = rid, uid = uid, pid = pid, aid = aid, aaid = aaid, routeid = routeid )
             info = "you just selected {} as the most fun route to this place".format(request.form['routename'])
@@ -460,7 +465,7 @@ def show_order_history(price = None):
             print (info)
         orderhistory = g.conn.execute(text('select l.name,  price, t.name, time FROM ticketrequired t JOIN\
                                location l ON t.pid = l.pid and t.aid = l.aid and t.aaid = l.aaid JOIN \
-                               orderhistory o on t.tid = o.tid where o.uid= :uids; '), uid = uid).fetchall() 
+                               orderhistory o on t.tid = o.tid where o.uid= :uid; '), uid = uid).fetchall() 
         print ("order history: ", orderhistory)
         return render_template("order_history.html", info = info, orderhistory = orderhistory)
     else: 
