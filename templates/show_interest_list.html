@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<html class ='home'>
+<html class ='home-interest'>
 <head>
 <style>
 /* The Modal (background) */
@@ -129,7 +129,7 @@
 
 .modal-header_equipment {
     padding: 2px 16px;
-    background-color: #ff3333;
+    background-color: #ff9933;
     color: white;
 }
 
@@ -137,7 +137,7 @@
 
 .modal-footer_equipment {
     padding: 2px 16px;
-    background-color: #ff3333;
+    background-color: #ff9933;
     color: white;
 }
 
@@ -175,23 +175,24 @@
     <li class="list-group-item">
                <p style="color:#6699ff;font-size:30px">{{ entry[0] }}</p>
 
-        <button name = "{{entry[8]}}" class = "ratingsbutton_equipment" id="{{loop.index}}">KNOW YOUR EQUIPMENT</a>
-        <button name = "{{entry[8]}} {{entry[9]}} {{entry[10]}} {{entry[5]}} {{entry[7]}}" class = "ratingsbutton_friends" >FIND FRIENDS</a>
+        <button name = "{{entry[8]}}" class = "ratingsbutton_equipment" id="{{loop.index}}">Know Your Equipment</a>
+        <button name = "{{entry[8]}} {{entry[9]}} {{entry[10]}} {{entry[5]}} {{entry[7]}}" class = "ratingsbutton_friends" >Find Friends</a>
+	<button name = "{{entry[8]}} {{entry[9]}} {{entry[10]}} {{entry[5]}} {{entry[6]}}" class = "delete_button" >Delete</a>
     </li>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Opening Time: {{entry[3]}}</p>
-    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Closing time : {{entry[4]}}</p>
+    <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Closing Time : {{entry[4]}}</p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; City : {{entry[2]}}</p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; State : {{entry[1]}} </p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Expected Duration : {{entry[5]}} - {{entry[6]}} </p>
     <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Your Estimated Budget : {{entry[7]}} </p>
         {% for info in entry[11] %}
-        <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; ticket: {{info[0]}} </p>
-        <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; ticket price : {{info[1]}} </p>
+        <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Ticket: {{info[0]}} </p>
+        <p class="list-group-item-text" style="color: #696969;font-size:20px;"> &nbsp;&nbsp;&nbsp;&nbsp; Ticket Price : {{info[1]}} </p>
         <form class="form-inline" action="{{ url_for('show_order_history') }}" method="POST" >
             <div class = "ticket button">
                 <input type="hidden" name="tid" value={{info[2]}}>
                  <input type='hidden' name ="price" value={{info[1]}}>
-                <button type="submit" class="btn btn-info"> Order this ticket</button>
+                <button type="submit" class="btn btn-info"> Order This Ticket</button>
             </div>
             
             
@@ -291,6 +292,28 @@ $(".ratingsbutton_friends").click(function(){
 	console.log(this.name);
 	functioncalled_friends(this.name);
 });
+
+$(".delete_button").click(function(){
+	console.log(this.name);
+	functioncalled_deleteinterest(this.name);
+});
+
+function functioncalled_deleteinterest(deleteinterest){
+
+	
+    var r = confirm("Are you sure you want to delete?");
+    if (r == true) {
+	$.getJSON($SCRIPT_ROOT + "/deletefrom_interestlist",{query:deleteinterest}).done(function(data){
+
+		location.reload();
+
+	});
+    } else {
+        
+    }
+
+	
+}
 
 
 function functioncalled_friends(findFriendData){

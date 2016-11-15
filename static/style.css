@@ -1,10 +1,17 @@
 html { 
   background: url(doodlemeetimage4.jpg) no-repeat center center fixed; 
+ 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+
 }
+.home-interest{
+  background-image: url(doodlemeetbackimage1.jpg) no-repeat center center fixed;
+}
+
+
 /*body            { font-family: sans-serif; background-image: url("doodlemeetbackimage1.jpg"); background-size: 1400px 800px; background-repeat:no-repeat;}*/
 a       	{font-size:1.6em; color: #377ba8;  }
 h1, h2          { color: #377ba8; font-family: 'Roboto', serif; margin: 0; }

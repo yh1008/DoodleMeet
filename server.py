@@ -293,6 +293,7 @@ def display_interest_list():
   )
 
 
+
 @app.route('/add_comment/activity', methods=['POST','GET'])
 def add_comment():
     print ("******************I am in add_comment() *********************************")
@@ -331,11 +332,50 @@ def add_comment():
                             log_info = log_info)
 
 
-@app.route('/trial')
-def trial():
-	print "***********************I am in trial ***************"
-	myDict={'a' : 2, 'b' : 3}
-	return flask.jsonify(**myDict)
+@app.route("/rate_route", methods = ['GET', 'POST'])
+def rate_route():
+    info = None
+    print ("******************I am in add_route_rating*********************")
+    if request.method == 'POST':
+        uid = session['uid']
+        print ("uid in rate_route", uid)
+        max_rid = g.conn.execute("SELECT max(rid) FROM ratefunroute").fetchall()[0][0]
+        rid = max_rid + 1
+        pid = request.form['pid']
+        print ("pid in rate_route", pid)
+        aid = request.form['aid']
+        print ("aid in rate_route", aid)
+        aaid = request.form['aaid']
+        print ("aaid in rate_route", aaid)
+        routeid = request.form['routeid']
+        print ("routeid in rate_route", routeid)
+        print ("routeid ", routeid)
+        activity_subcategory = request.form['activity_subcategory']
+        g.conn.execute(text('INSERT INTO ratefunroute (rid, uid, pid, aid, aaid, route_number, score) VALUES (:rid, :uid, :pid, :aid, :aaid, :routeid, 1)'),
+                rid = rid, uid = uid, pid = pid, aid = aid, aaid = aaid, routeid = routeid )
+        info = "Hey you just selected {} as the most fun route to this place".format(request.form['routename'])
+        print (info)
+        return redirect(url_for('rating_display(activity_subcategory, pid, aid, aaid)'))
+
+
+@app.route('/deletefrom_interestlist')
+def deletefrom_interestlist():
+	uid=session['uid']
+	activityID = request.args.get('query')
+	activityID = str(activityID)
+	print type(activityID)
+	words = activityID.split(" ")
+	print words
+	start_time_delete = words[3] + " " + words[4]
+	end_time_delete = words[5] + " " + words[6]
+	print start_time_delete
+	print end_time_delete
+	deleteentry = g.conn.execute("delete from interest where usr = %d AND activity_category = %d AND activity_subcategory = %d AND pid = %d AND start_time = to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI') AND end_time = to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI')" %(int(uid), int(words[0]), int(words[1]), int(words[2]), start_time_delete,end_time_delete))
+	success = ["Successfully deleted this entry"]
+	return Response(json.dumps(success), mimetype='application/json')
+
+
+
 
 @app.route('/find_activitygear')
 def find_activitygear():
