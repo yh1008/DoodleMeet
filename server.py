@@ -73,7 +73,7 @@ def teardown_request(exception):
 
 @app.route('/show_activitylist/<name>')
 def handler(name):
-    act_dic = {'concerts':'1', 'dancing' : '2', 'art': '3', 'museums': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11", "sailing" : "12"}
+    act_dic = {'concerts':'1', 'dancing' : '2', 'art': '3', 'museums': '4', 'fishing':'7', 'kayaking':'8', 'pets' : '6', "water_sports":'10', "clubing": "11", "sailing" : "12", "broadwayshow" : "13"}
     text_dict = {'museums' : 'Museums provide places of relaxation and inspiration. And most importantly, they are a place of authenticity. We live in a world of reproductions - the objects in museums are real. It\'s a way to get away from the overload of digital technology.',
                  'dancing' : 'The energy you give off is the energy you receive. I really think that, so I\'m always myself - jumping, dancing, singing around, trying to cheer everybody up.',
                  'art' : 'The purpose of art is washing the dust of daily life off our souls.',
@@ -82,7 +82,8 @@ def handler(name):
                  'kayaking' : 'Kayaking is the use of a kayak for moving across water. It is distinguished from canoeing by the sitting position of the paddler and the number of blades on the paddle. A kayak is a low-to-the-water, canoe-like boat in which the paddler sits facing forward, legs in front, using a double-bladed paddle to pull front-to-back on one side and then the other in rotation.[1] Most kayaks have closed decks, although sit-on-top and inflatable kayaks are growing in popularity as well',
                  'pets' : 'Until one has loved an animal a part of one\'s soul remains unawakened.',
                  'sailing': 'Channel Bill Murray’s character from What About Bob? by shouting “I’m sailing!” and “Ahoy!” throughout your voyage. You’re guaranteed to make friends.',
-                 'clubing' : 'I have Social Disease. I have to go out every night. If I stay home one night I start spreading rumours to my dogs.'}
+                 'clubing' : 'I have Social Disease. I have to go out every night. If I stay home one night I start spreading rumours to my dogs.',
+                 'broadwayshow' : 'Relax, just enjoy the show.'}
     quote_dict = {'museums' : "Thomas P. Campbell",
                   'dancing' : 'Cara Delevingne',
                  'art' : 'Pablo Picasso',
@@ -91,7 +92,8 @@ def handler(name):
                  'kayaking' : 'Wikipedia',
                  'pets' : 'Anatole France',
                  'sailing': 'timeout.com',
-                 'clubing' : 'Andy Warhol'
+                 'clubing' : 'Andy Warhol',
+                 'broadwayshow' : 'Ye Hua'
                  }
     text = text_dict[name]
     quote = quote_dict[name]
@@ -176,7 +178,8 @@ def rating_display(activity_subcategory, pid, aid, aaid):
             routeid = request.form['routeid']
             print ("routeid in rate_route", routeid)
             print ("routename in rate_route", request.form['routename'])
-            activity_subcategory = request.form['activity_subcategory']
+            activity_subcategory = g.conn.execute(text('select name from activity where aid = :aid and aaid = :aaid'), aid = aid, aaid = aaid).fetchall()[0][0]
+            activity_subcategory = str(activity_subcategory)
             route_exists = g.conn.execute(text("SELECT * FROM modeoftransport WHERE route_number = :routeid AND \
                                      pid = :pid AND aid = :aid AND aaid = :aaid"), routeid = routeid, pid = pid, aid = aid, aaid = aaid).fetchall()
             print ("route exists: ", route_exists)
@@ -189,6 +192,8 @@ def rating_display(activity_subcategory, pid, aid, aaid):
             #get all possible routes in route table
             all_routes = g.conn.execute("SELECT rid, name FROM route").fetchall()
             print ("all_routes", all_routes)
+            routes = g.conn.execute(text('select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
+                where pid=:pid and aid=:aid and aaid=:aaid;'), pid =int(pid), aid = int(aid), aaid =int(aaid)).fetchall()
             return render_template('show_ratings.html', 
     						pid = pid,
     						aid = aid,
@@ -255,7 +260,9 @@ def show_entries():
 def added_time(aid, aaid, pid):
     print("****************************************I am in Added_Time*******************************************")
     startdatetime = str(request.form['startdatetime'])
+    print ("startdatetime: ", startdatetime)
     enddatetime = str(request.form['enddatetime'])
+    print ("enddatetime: ", enddatetime)
     startdate_and_time=startdatetime.split('T')
     startdatetime=startdate_and_time[0]+ ' ' + startdate_and_time[1]
     enddate_and_time=enddatetime.split('T')
@@ -263,7 +270,8 @@ def added_time(aid, aaid, pid):
     budget=int(request.form['budget'])
     uid = session['uid']
     entry_by_location = g.conn.execute(text("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (:uid, :activity_category, :activity_subcategory, :pid, :start_time, :end_time, :budget)"), uid = int(uid), activity_category = int(aid), activity_subcategory = int(aaid), pid = int(pid), start_time = datetime.datetime.strptime(startdatetime,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(enddatetime,"%Y-%m-%d %H:%M"), budget = budget)
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('display_interest_list'))
+
     
     
 

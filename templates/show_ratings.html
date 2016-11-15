@@ -43,9 +43,9 @@
 	<br><br>
 	<form action ="{{url_for('added_time', aid = aid, aaid = aaid, pid = pid)}}" method="POST">
 	 <div class="ratingsform"> <p style="color: #696969;font-size:20px;">Start Time:</p></div>
-	  <input type="datetime-local" name="startdatetime" style="font-size: 15px;">
-         <div class="ratingsform"> <p style="color: #696969;font-size:20px;">End Time:</p></div>
-	  <input type="datetime-local" name="enddatetime" style="font-size: 15px;">
+	  <input type="datetime-local" name="startdatetime" style="font-size: 15px;" placeholder="2016-12-30T10:10">
+         <div class="ratingsform"> <p style="color: #696969;font-size:20px;" >End Time:</p></div>
+	  <input type="datetime-local" name="enddatetime" style="font-size: 15px;" placeholder='2016-12-30T22:10'>
 	 <div class="ratingsform"> <p style="color: #696969;font-size:20px;">Budget:</p></div>	 
 	  <input type="text" name="budget" placeholder="Your estimated budget" style="font-size: 15px;">
 	  <input type="submit" class="btn btn-info" value="Add to Interest List">
@@ -105,7 +105,7 @@
         </div>
         <div class="line-separator"></div>
         <div class="mycomment">
-            <label name = "comment" for="comment">Want to leave your own omment?</label>
+            <label name = "comment" for="comment">Want to leave your own comment?</label>
             <textarea class="form-control" rows="5" id="comment" name='comment'></textarea>
         </div> 
         <input type="hidden" name="pid" value={{entry_by_location[0]}}>
