@@ -270,7 +270,7 @@ def added_time(aid, aaid, pid):
     budget=int(request.form['budget'])
     uid = session['uid']
     entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), %d)" %(int(uid), int(aid), int(aaid), int(pid), startdatetime, enddatetime, budget))
-    return redirect(url_for('display_interest_list'))
+    return redirect(url_for('show_entries'))
     
     
 
@@ -295,10 +295,8 @@ def display_interest_list():
         for i in range (11):
             newentry.append(entry[i])
         newentry.append(ticket_info)
-        print ("new entry: ", newentry)
         entry_by_location.append(newentry)
-        print ("11: ", newentry[11])
-    print ("entry by location: ", entry_by_location)
+
     
     return render_template('show_interest_list.html', 
                             mynames = entry_by_location, 
@@ -650,7 +648,6 @@ def signup():
         username = str(request.form['username'])
         print ("username: {}".format(username))
         password = str(request.form['password'])
-        print ("password: {}".format(password))
         hashed_password = hashlib.md5(str(request.form['password'])).hexdigest()
         #see if the username is already registered 
         username_exists = g.conn.execute(text("select username from users where username = :username"), username = username).fetchall()
