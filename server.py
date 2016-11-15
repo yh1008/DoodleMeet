@@ -262,7 +262,7 @@ def added_time(aid, aaid, pid):
     enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
     budget=int(request.form['budget'])
     uid = session['uid']
-    entry_by_location = g.conn.execute("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (%d, %d, %d, %d, to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI'), %d)" %(int(uid), int(aid), int(aaid), int(pid), startdatetime, enddatetime, budget))
+    entry_by_location = g.conn.execute(text("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (:uid, :activity_category, :activity_subcategory, :pid, :start_time, :end_time, :budget)"), uid = int(uid), activity_category = int(aid), activity_subcategory = int(aaid), pid = int(pid), start_time = datetime.datetime.strptime(startdatetime,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(enddatetime,"%Y-%m-%d %H:%M"), budget = budget)
     return redirect(url_for('show_entries'))
     
     
@@ -373,9 +373,11 @@ def deletefrom_interestlist():
 	print words
 	start_time_delete = words[3] + " " + words[4]
 	end_time_delete = words[5] + " " + words[6]
+	start_time_delete=start_time_delete[:-3]
+	end_time_delete=end_time_delete[:-3]
 	print start_time_delete
 	print end_time_delete
-	deleteentry = g.conn.execute("delete from interest where usr = %d AND activity_category = %d AND activity_subcategory = %d AND pid = %d AND start_time = to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI') AND end_time = to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI')" %(int(uid), int(words[0]), int(words[1]), int(words[2]), start_time_delete,end_time_delete))
+	deleteentry = g.conn.execute(text("delete from interest where usr = :uid AND activity_category = :aid AND activity_subcategory = :aaid AND pid = :pid AND start_time = :start_time AND end_time = :end_time"), uid=int(uid), aid =int(words[0]), aaid= int(words[1]), pid=int(words[2]), start_time = datetime.datetime.strptime(start_time_delete,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(end_time_delete,"%Y-%m-%d %H:%M"))
 	success = ["Successfully deleted this entry"]
 	return Response(json.dumps(success), mimetype='application/json')
 
@@ -423,7 +425,7 @@ def find_activityfriends():
 	print words
 	print (g.conn.execute('select * from interest'))
 	print("***********************I am in find_activityfriends ***************")
-	getfriends= g.conn.execute("select firstname, lastname FROM users u JOIN interest i ON u.uid = i.usr WHERE activity_category = %d AND activity_subcategory = %d AND pid = %d AND start_time :: date = to_timestamp('%s'::text, 'YYYY-MM-DD') AND budget <= %d + 10 AND budget >= %d - 10 AND i.usr <> %d" %(int(words[0]), int(words[1]), int(words[2]), '2016-11-15', 20, 20, int(uid))).fetchall()
+	getfriends= g.conn.execute(text("select firstname, lastname FROM users u JOIN interest i ON u.uid = i.usr WHERE activity_category = :aid AND activity_subcategory = :aaid AND pid = :pid AND start_time::date = :start_time AND budget <= :budget + 10 AND budget >= :budget - 10 AND i.usr <> :uid"), aid = int(words[0]), aaid = int(words[1]), pid = int(words[2]), start_time = words[3], budget = words[5], uid = int(uid)).fetchall()
 	print getfriends
 	print(len(getfriends))
 	print "got nothing man"

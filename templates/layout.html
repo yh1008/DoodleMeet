@@ -1,8 +1,8 @@
 <!doctype html>
-<title>Doodle Meet</title>
+<title>DoodleMeet</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
-  <h1>Doodle Meet</h1>
+  <h1>DoodleMeet</h1>
   <div class=metanav>
   {% if not session.logged_in %}
     <a href="{{ url_for('signup') }}">Sign Up</a>
