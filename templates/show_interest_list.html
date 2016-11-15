@@ -61,7 +61,7 @@
 
 .modal-header_friends {
     padding: 2px 16px;
-    background-color: #00bfff;
+    background-color: #33cc33;
     color: white;
 }
 
@@ -69,7 +69,7 @@
 
 .modal-footer_friends {
     padding: 2px 16px;
-    background-color: #00bfff;
+    background-color: #33cc33;
     color: white;
 }
 .modal_equipment {
@@ -129,7 +129,7 @@
 
 .modal-header_equipment {
     padding: 2px 16px;
-    background-color: #ff9933;
+    background-color: #66ccff;
     color: white;
 }
 
@@ -137,7 +137,7 @@
 
 .modal-footer_equipment {
     padding: 2px 16px;
-    background-color: #ff9933;
+    background-color: #66ccff;
     color: white;
 }
 
@@ -320,7 +320,7 @@ function functioncalled_friends(findFriendData){
 
 	for (var i = 0; i < data.length; i++){
 	var li = document.createElement("li");	
-	li.style.color="#0099ff";
+	li.style.color="#262626";
 	li.style.fontSize="30px";
 
 	li.appendChild(document.createTextNode(data[i]));
@@ -337,7 +337,7 @@ function functioncalled_equipment(activityID){
 	var ul = document.getElementById("myulID_equipment");
 	for (var i = 0; i < data.length; i++){
 	var li = document.createElement("li");	
-	li.style.color="#ff3333";
+	li.style.color="#262626";
 	li.style.fontSize="30px";
 	li.appendChild(document.createTextNode(data[i][0]));
 	var subul = document.createElement("ul");
