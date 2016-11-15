@@ -1,9 +1,11 @@
 # DoodleMeet
 
-For TAs to test, use the following user login credentials:   
+For TAs to test, use the following user login credentials: 
+```
 username: yh2901  
 password: emily  
-  
+```
+
 feel free to signup as well.   
 
 
