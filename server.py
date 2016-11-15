@@ -250,6 +250,7 @@ def display_interest_list():
                             )
 
 
+
 @app.route('/add_comment/activity', methods=['POST','GET'])
 def add_comment():
     print ("******************I am in add_comment() *********************************")
@@ -313,13 +314,25 @@ def rate_route():
         return redirect(url_for('rating_display(activity_subcategory, pid, aid, aaid)'))
 
 
+@app.route('/deletefrom_interestlist')
+def deletefrom_interestlist():
+	uid=session['uid']
+	activityID = request.args.get('query')
+	activityID = str(activityID)
+	print type(activityID)
+	words = activityID.split(" ")
+	print words
+	start_time_delete = words[3] + " " + words[4]
+	end_time_delete = words[5] + " " + words[6]
+	print start_time_delete
+	print end_time_delete
+	deleteentry = g.conn.execute("delete from interest where usr = %d AND activity_category = %d AND activity_subcategory = %d AND pid = %d AND start_time = to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI') AND end_time = to_timestamp('%s'::text, 'YYYY-MM-DD HH24:MI')" %(int(uid), int(words[0]), int(words[1]), int(words[2]), start_time_delete,end_time_delete))
+	success = ["Successfully deleted this entry"]
+	return Response(json.dumps(success), mimetype='application/json')
 
 
-@app.route('/trial')
-def trial():
-	print "***********************I am in trial ***************"
-	myDict={'a' : 2, 'b' : 3}
-	return flask.jsonify(**myDict)
+
+
 
 @app.route('/find_activitygear')
 def find_activitygear():
