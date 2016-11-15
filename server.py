@@ -15,6 +15,7 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 import hashlib
 import datetime
+from sqlalchemy.exc import IntegrityError
 #from sqlalchemy.dialects.postgresql import insert
 from flask import Flask, Response, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -269,7 +270,10 @@ def added_time(aid, aaid, pid):
     enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
     budget=int(request.form['budget'])
     uid = session['uid']
-    entry_by_location = g.conn.execute(text("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (:uid, :activity_category, :activity_subcategory, :pid, :start_time, :end_time, :budget)"), uid = int(uid), activity_category = int(aid), activity_subcategory = int(aaid), pid = int(pid), start_time = datetime.datetime.strptime(startdatetime,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(enddatetime,"%Y-%m-%d %H:%M"), budget = budget)
+    try:
+    	entry_by_location = g.conn.execute(text("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (:uid, :activity_category, :activity_subcategory, :pid, :start_time, :end_time, :budget)"), uid = int(uid), activity_category = int(aid), activity_subcategory = int(aaid), pid = int(pid), start_time = datetime.datetime.strptime(startdatetime,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(enddatetime,"%Y-%m-%d %H:%M"), budget = budget)
+    except IntegrityError as e:
+    	print "Oops! Value already in database"
     return redirect(url_for('display_interest_list'))
 
     
@@ -439,8 +443,8 @@ def find_activityfriends():
 	print "got nothing man"
 	l = []
 	if len(getfriends)!=0:
-		for i in getfriends[0]:
-			l.append(str(i))
+		for i in getfriends:
+			l.append(str(i[0]) + " " + str(i[1]))
 	return Response(json.dumps(l), mimetype='application/json')
   
   
