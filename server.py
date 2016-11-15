@@ -107,24 +107,27 @@ def handler(name):
                             quote = quote,
                             log_info = log_info)
 
-@app.route('/rating_display/<activity_subcategory>/<pid>/<aid>/<aaid>')
+@app.route('/rating_display/<activity_subcategory>/<pid>/<aid>/<aaid>', methods = ['GET', 'POST'])
 def rating_display(activity_subcategory, pid, aid, aaid):
     uid = session['uid']
     print ("******************I am in rating_display *********************************")
     print ("pid,aid, aaid: ", pid, aid, aaid)
     if (str(aid) == 'static'):
         return  ('', 204)
-    avg_rating = g.conn.execute('SELECT AVG(score) FROM rate r JOIN friendship f ON r.usr = f.friend WHERE f.usr = %d AND pid = %d AND activity_category = %d AND activity_subcategory = %d;'
-                                 %(uid, int(pid), int(aid), int(aaid))).fetchall()
-    entry_by_location = g.conn.execute('select * from location where pid = %d and aid = %d and aaid = %d '%(int(pid), int(aid), int(aaid))).fetchall()[0]
-    rating_list = g.conn.execute('SELECT * FROM rate r JOIN friendship f ON r.usr = f.friend WHERE f.usr = %d AND pid = %d AND activity_category = %d AND activity_subcategory = %d;'
-                                 %(uid, int(pid), int(aid), int(aaid))).fetchall()
+    avg_rating = g.conn.execute(text('SELECT AVG(score) FROM rate r JOIN friendship f ON \
+    r.usr = f.friend WHERE f.usr = :uid AND pid = :pid AND activity_category = :aid AND activity_subcategory = :aaid;')
+     ,uid = uid, pid = int(pid), aid = int(aid), aaid = int(aaid)).fetchall()
+    entry_by_location = g.conn.execute(text('select * from location where pid = :pid and\
+     aid = :aid and aaid = :aaid'), pid = int(pid), aid = int(aid), aaid = int(aaid)).fetchall()[0]
+    rating_list = g.conn.execute(text('SELECT * FROM rate r JOIN friendship f ON r.usr = f.friend WHERE f.usr = :uid\
+                     AND pid = :pid AND activity_category = :aid AND activity_subcategory = :aaid;'),
+                                 uid = uid, pid = int(pid), aid = int(aid), aaid = int(aaid)).fetchall()
     print ("whole list of rating: ", rating_list)
     friends_comment = [] #stores [firstname, lastname, comment, rating]
     for entry in rating_list:
-        friend_name = g.conn.execute('SELECT firstname, lastname from users WHERE uid=%d'%int(entry[1])).fetchall()[0]
+        friend_name = g.conn.execute(text('SELECT firstname, lastname from users WHERE uid= :uid'), uid = int(entry[1])).fetchall()[0]
         friends_comment.append([friend_name[0], friend_name[1], entry[5], entry[6]])
-    activity_category = g.conn.execute('select name from activitycategory where aid =%d'% int(aid)).fetchall()[0][0]
+    activity_category = g.conn.execute(text('select name from activitycategory where aid = :aid'), aid = int(aid)).fetchall()[0][0]
     print ("friends_comment: ", friends_comment) 
     print (" entry_by_location: ",  entry_by_location)
     print ("activity_category: ", activity_category)
@@ -141,13 +144,13 @@ def rating_display(activity_subcategory, pid, aid, aaid):
         log_info = " Login"
     
     #show routes about this place#
-    routes = g.conn.execute('select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
-                where pid=%d and aid=%d and aaid=%d;'%(int(pid), int(aid), int(aaid))).fetchall()
+    routes = g.conn.execute(text('select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
+                where pid=:pid and aid=:aid and aaid=:aaid;'), pid =int(pid), aid = int(aid), aaid =int(aaid)).fetchall()
     #show most fun routes about his place|activity
-    most_fun_routes = g.conn.execute('SELECT a.n FROM (SELECT route_number, rt.name n, count(*) counts FROM \
+    most_fun_routes = g.conn.execute(text('SELECT a.n FROM (SELECT route_number, rt.name n, count(*) counts FROM \
                            ratefunroute r JOIN friendship f ON r.uid = f.friend JOIN route rt ON rt.rid = r.route_number \
-                           WHERE f.usr = %d AND pid = %d AND aid = %d AND aaid = %d GROUP BY route_number, rt.name ORDER BY counts desc \
-                           limit 1)a ;'%(uid, int(pid), int(aid), int(aaid))).fetchall()
+                           WHERE f.usr = :uid AND pid = :pid AND aid = :aid AND aaid = :aaid GROUP BY route_number, rt.name ORDER BY counts desc \
+                           limit 1)a ;'), uid = uid, pid = int(pid), aid = int(aid), aaid = int(aaid)).fetchall()
     if (len(most_fun_routes) == 0):
         most_fun_routes = "the potential routes to this places are"
     else:
@@ -155,7 +158,48 @@ def rating_display(activity_subcategory, pid, aid, aaid):
     print ("most_fun_routes: ", most_fun_routes)
     #get all possible routes in route table
     all_routes = g.conn.execute("SELECT rid, name FROM route").fetchall()
-    print (all_routes)
+    print ("all_routes", all_routes)
+    if request.method == 'POST':
+        info = None
+        print ("******************I am in add_route_rating*********************")
+        if request.method == 'POST':
+            uid = session['uid']
+            print ("uid in rate_route", uid)
+            max_rid = g.conn.execute("SELECT max(rid) FROM ratefunroute").fetchall()[0][0]
+            rid = max_rid + 1
+            pid = request.form['pid']
+            print ("pid in rate_route", pid)
+            aid = request.form['aid']
+            print ("aid in rate_route", aid)
+            aaid = request.form['aaid']
+            print ("aaid in rate_route", aaid)
+            routeid = request.form['routeid']
+            print ("routeid in rate_route", routeid)
+            print ("routeid ", routeid)
+            activity_subcategory = request.form['activity_subcategory']
+            g.conn.execute(text('INSERT INTO ratefunroute (rid, uid, pid, aid, aaid, route_number, score) VALUES (:rid, :uid, :pid, :aid, :aaid, :routeid, 1)'),
+                rid = rid, uid = uid, pid = pid, aid = aid, aaid = aaid, routeid = routeid )
+            info = "you just selected {} as the most fun route to this place".format(request.form['routename'])
+            print (info)
+            #get all possible routes in route table
+            all_routes = g.conn.execute("SELECT rid, name FROM route").fetchall()
+            print ("all_routes", all_routes)
+            return render_template('show_ratings.html', 
+    						pid = pid,
+    						aid = aid,
+    						aaid = aaid,
+                            rating = avg_rating, 
+                            entry_by_location  = entry_by_location, 
+                            activity_subcategory = activity_subcategory, 
+                            activity_category = activity_category,
+                            friends_comment = friends_comment,
+                            routes = routes,
+                            most_fun_routes = most_fun_routes,
+                            log_info = log_info,
+                            all_routes = all_routes,
+                            info = info)
+
+
     return render_template('show_ratings.html', 
     						pid = pid,
     						aid = aid,
@@ -175,12 +219,12 @@ def rating_display(activity_subcategory, pid, aid, aaid):
 def loc_display(name):
     print ("******************I am in loc_display *********************************")
     location_table_keys = ["pid", 'aid', 'aaid', 'open_time', 'close_time', 'state', 'city', 'name']
-    res = g.conn.execute("select aid, aaid from activity where name='%s'"%name).fetchall()
+    res = g.conn.execute(text("select aid, aaid from activity where name=:name"),name = name).fetchall()
     aid = res[0][0]
     aaid = res[0][1]
-    activity_category =  g.conn.execute("select name from activitycategory where aid='%d'"%aid).fetchall()[0][0]
+    activity_category =  g.conn.execute(text("select name from activitycategory where aid=:aid"), aid = aid).fetchall()[0][0]
     print ("activity_category", activity_category)
-    entry_by_location = g.conn.execute('select * from location where aid = %d and aaid = %d'%(aid,aaid)).fetchall()
+    entry_by_location = g.conn.execute(text('select * from location where aid = :aid and aaid = :aaid'), aid = aid, aaid = aaid).fetchall()
     print (entry_by_location)
     if (session['logged_in']):
         log_info = " Logout"
@@ -224,7 +268,7 @@ def display_interest_list():
         abort(401)
     uid = session['uid']
     print ("uid in interest: ", uid)
-    entry_by_location1 = g.conn.execute('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = %d' %uid).fetchall()
+    entry_by_location1 = g.conn.execute(text('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = :uid'), uid = uid).fetchall()
     entry_by_location = []
     newentry = []
     for entry in entry_by_location1:
@@ -246,8 +290,7 @@ def display_interest_list():
     
     return render_template('show_interest_list.html', 
                             mynames = entry_by_location, 
-                            
-                            )
+  )
 
 
 
@@ -258,7 +301,7 @@ def add_comment():
     pid = int(request.form['pid'])
     aid = int(request.form['aid'])
     aaid = int(request.form['aaid'])
-    activity_subcategory = g.conn.execute('select name from activity where aid = %d and aaid = %d'%(aid, aaid)).fetchall()[0][0]
+    activity_subcategory = g.conn.execute(text('select name from activity where aid = :aid and aaid = :aaid'), aid = aid, aaid = aaid).fetchall()[0][0]
     activity_subcategory = str(activity_subcategory)
     latest_rid = int(g.conn.execute('select max(rid) from rate').fetchall()[0][0])
     rid = latest_rid+1
@@ -272,10 +315,10 @@ def add_comment():
     print ("rating: ", score)
     g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score=score)
     
-    new_comment = g.conn.execute('SELECT comment from rate WHERE rid=%d'%rid).fetchall()[0][0]
+    new_comment = g.conn.execute(text('SELECT comment from rate WHERE rid = :rid'), rid = rid).fetchall()[0][0]
     print ("newly entered comment: ", new_comment)
-    entry_by_location = g.conn.execute('select * from location where pid = %d and aid = %d and aaid = %d '%(int(pid), int(aid), int(aaid))).fetchall()[0]
-    activity_category =  g.conn.execute("select name from activitycategory where aid='%d'"%aid).fetchall()[0][0]
+    entry_by_location = g.conn.execute(text('select * from location where pid = :pid and aid = :aid and aaid = :aaid'), pid = int(pid), aid =int(aid), aaid = int(aaid)).fetchall()[0]
+    activity_category =  g.conn.execute(text("select name from activitycategory where aid=:aid"), aid = aid).fetchall()[0][0]
     if (session['logged_in']):
         log_info = " Logout"
     else:
@@ -287,6 +330,7 @@ def add_comment():
                             new_comment = new_comment,
                             score = score,
                             log_info = log_info)
+
 
 @app.route("/rate_route", methods = ['GET', 'POST'])
 def rate_route():
@@ -333,13 +377,12 @@ def deletefrom_interestlist():
 
 
 
-
 @app.route('/find_activitygear')
 def find_activitygear():
 	activityID = request.args.get('query', 0, type=int)
 	print(activityID)
 	print("***********************I am in find_activitygear ***************")
-	getgear= g.conn.execute('select g.name,s.name,s.city from gears g INNER JOIN gearstocarry gc ON g.gid=gc.gid INNER JOIN travelitemshop ts ON gc.gid=ts.gear INNER JOIN shops s ON s.sid=ts.sid where gc.aid=%d' %activityID).fetchall()
+	getgear= g.conn.execute(text('select g.name,s.name,s.city from gears g INNER JOIN gearstocarry gc ON g.gid=gc.gid INNER JOIN travelitemshop ts ON gc.gid=ts.gear INNER JOIN shops s ON s.sid=ts.sid where gc.aid=:activityID'), activityID = activityID).fetchall()
 	print getgear
 	print getgear[0][0]
 	x=[[] for i in range(len(getgear))]
