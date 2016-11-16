@@ -396,7 +396,10 @@ def find_activityfriends():
 	activityID = request.args.get('query')
 	activityID = str(activityID)
 	words = activityID.split(" ")
-	getfriends= g.conn.execute(text("select firstname, lastname FROM users u JOIN interest i ON u.uid = i.usr WHERE activity_category = :aid AND activity_subcategory = :aaid AND pid = :pid AND start_time::date = :start_time AND budget <= :budget + 10 AND budget >= :budget - 10 AND i.usr <> :uid"), aid = int(words[0]), aaid = int(words[1]), pid = int(words[2]), start_time = words[3], budget = words[5], uid = int(uid)).fetchall()
+	getfriends= g.conn.execute(text("select firstname, lastname FROM users u JOIN friendship f \
+    on f.friend = u.uid JOIN interest i ON u.uid = i.usr WHERE  f.usr = :uid AND \
+    activity_category = :aid AND activity_subcategory = :aaid AND pid = :pid AND \
+    start_time::date = :start_time AND budget <= :budget + 10 AND budget >= :budget - 10 AND i.usr <> :uid"), aid = int(words[0]), aaid = int(words[1]), pid = int(words[2]), start_time = words[3], budget = words[5], uid = int(uid)).fetchall()
 	l = []
 	if len(getfriends)!=0:
 		for i in getfriends:
