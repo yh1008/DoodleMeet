@@ -268,12 +268,13 @@ def added_time(aid, aaid, pid):
     startdatetime=startdate_and_time[0]+ ' ' + startdate_and_time[1]
     enddate_and_time=enddatetime.split('T')
     enddatetime=enddate_and_time[0] + ' ' + enddate_and_time[1]
-    budget=int(request.form['budget'])
+    budget=float(request.form['budget'])
     uid = session['uid']
+    print "Reaching here!!"
     try:
     	entry_by_location = g.conn.execute(text("insert into interest(usr, activity_category, activity_subcategory, pid, start_time, end_time, budget) values (:uid, :activity_category, :activity_subcategory, :pid, :start_time, :end_time, :budget)"), uid = int(uid), activity_category = int(aid), activity_subcategory = int(aaid), pid = int(pid), start_time = datetime.datetime.strptime(startdatetime,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(enddatetime,"%Y-%m-%d %H:%M"), budget = budget)
-    except IntegrityError as e:
-    	print "Oops! Value already in database"
+    except (IntegrityError, ValueError) as e:
+    	print "Oops! Value already in database or floating point value for budget"
     return redirect(url_for('display_interest_list'))
 
     
