@@ -10,6 +10,7 @@
   <link rel="stylesheet" type="text/css" href="/static/comment_rating.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 </head>
 <body>
 
@@ -41,16 +42,41 @@
  
 
 	<br><br>
-	<form action ="{{url_for('added_time', aid = aid, aaid = aaid, pid = pid)}}" method="POST">
+	<form action ="{{url_for('added_time', aid = aid, aaid = aaid, pid = pid)}}" method="POST" id="myForm">
 	 <div class="ratingsform"> <p style="color: #696969;font-size:20px;">Start Time:</p></div>
 	  <input type="datetime-local" name="startdatetime" style="font-size: 15px;" placeholder="2016-12-30T10:10">
          <div class="ratingsform"> <p style="color: #696969;font-size:20px;" >End Time:</p></div>
 	  <input type="datetime-local" name="enddatetime" style="font-size: 15px;" placeholder='2016-12-30T22:10'>
 	 <div class="ratingsform"> <p style="color: #696969;font-size:20px;">Budget:</p></div>	 
 	  <input type="text" name="budget" placeholder="Your estimated budget" style="font-size: 15px;">
-	  <input type="submit" class="btn btn-info" value="Add to Interest List">
+	  <input id ="subnewtide" type="submit" disabled = "disabled" class="btn btn-info" value="Add to Interest List">
 	</form> <br><br>
+<script>
+var inputs = $("form#myForm input");
 
+    var validateInputs = function validateInputs(inputs) {
+      var validForm = true;
+      inputs.each(function(index) {
+        var input = $(this);
+        if (!input.val()) {
+          $("#subnewtide").attr("disabled", "disabled");
+          validForm = false;
+        }
+      });
+      return validForm;
+    }
+
+inputs.each(function() {
+      var input = $(this);
+
+        input.keyup(function() {
+          if (validateInputs(inputs)) {
+            $("#subnewtide").removeAttr("disabled");
+          }
+        });
+      
+    });
+</script>
     <div class="list-group">
         <a href="#" class="list-group-item list-group-item-action active">
             {% for entry in friends_comment %}
