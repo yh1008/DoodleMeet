@@ -313,6 +313,7 @@ def display_interest_list():
 
 @app.route('/add_comment/activity', methods=['POST','GET'])
 def add_comment():
+    error = None
     print ("******************I am in add_comment() *********************************")
     comment = request.form['comment']
     pid = int(request.form['pid'])
@@ -325,15 +326,32 @@ def add_comment():
     print ("latest_rid: ", latest_rid)
     #print ("pid: %s, aid: %s, aaid: %s"%(pid, aid, aaid))
     print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
-    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
-                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
+
     uid = session['uid']
     score = request.form['rating']
     print ("rating: ", score)
-    g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score=score)
-    
-    new_comment = g.conn.execute(text('SELECT comment from rate WHERE rid = :rid'), rid = rid).fetchall()[0][0]
-    print ("newly entered comment: ", new_comment)
+    if int(score) == -1 and len(comment) != 0:
+        query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment)'
+        g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment)
+        score = str(score) +'/5'
+    elif int(score) == -1 and len(comment) == 0: 
+        comment = "Yo, you didn't enter any comment!"
+        score = "Yo, you didn't enter any score!"
+        error = "needs to enter at least a comment and/or rating in order to submit!"
+    elif len(comment) == 0 and int(score) != -1:
+        query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, score)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :score)'
+        g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, score = score)
+        score = str(score) +'/5'
+        comment = "Yo, you didn't enter any comment!"
+    elif len(comment) != 0 and int(score) != -1:
+         query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'  
+         g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score = score)  
+         score = str(score) +'/5'
+    #new_comment = g.conn.execute(text('SELECT comment from rate WHERE rid = :rid'), rid = rid).fetchall()[0][0]
+    #print ("newly entered comment: ", new_comment)
     entry_by_location = g.conn.execute(text('select * from location where pid = :pid and aid = :aid and aaid = :aaid'), pid = int(pid), aid =int(aid), aaid = int(aaid)).fetchall()[0]
     activity_category =  g.conn.execute(text("select name from activitycategory where aid=:aid"), aid = aid).fetchall()[0][0]
     if (session['logged_in']):
@@ -344,9 +362,10 @@ def add_comment():
                             entry_by_location  = entry_by_location, 
                             activity_subcategory = activity_subcategory, 
                             activity_category = activity_category,
-                            new_comment = new_comment,
+                            new_comment = str(comment),
                             score = score,
-                            log_info = log_info)
+                            log_info = log_info,
+                            error = error)
 
 
 @app.route("/rate_route", methods = ['GET', 'POST'])

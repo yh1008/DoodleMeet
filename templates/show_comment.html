@@ -34,10 +34,11 @@
     <p class="list-group-item-text">  | open time: {{entry_by_location[3]}}   close time : {{entry_by_location[4]}}   city : {{entry_by_location[6]}}   state : {{entry_by_location[5]}} </p>
     <div class="list-group">
         <a href="#" class="list-group-item list-group-item-action active">
+          {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
             <h5 class="list-group-item-heading">you commented this place: </h5>
             <p class="list-group-item-text">"{{new_comment}}"</p>
             <h5 class="list-group-item-heading">you rate this place: </h5>
-            <p class="list-group-item-text">{{score}}/5</p>
+            <p class="list-group-item-text">{{score}}</p>
         </a>
     </div>
 
