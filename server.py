@@ -113,8 +113,6 @@ def handler(name):
 @app.route('/rating_display/<activity_subcategory>/<pid>/<aid>/<aaid>', methods = ['GET', 'POST'])
 def rating_display(activity_subcategory, pid, aid, aaid):
     uid = session['uid']
-    print ("******************I am in rating_display *********************************")
-    print ("pid,aid, aaid: ", pid, aid, aaid)
     if (str(aid) == 'static'):
         return  ('', 204)
     avg_rating = g.conn.execute(text('SELECT AVG(score) FROM rate r JOIN friendship f ON \
@@ -125,16 +123,11 @@ def rating_display(activity_subcategory, pid, aid, aaid):
     rating_list = g.conn.execute(text('SELECT * FROM rate r JOIN friendship f ON r.usr = f.friend WHERE f.usr = :uid\
                      AND pid = :pid AND activity_category = :aid AND activity_subcategory = :aaid;'),
                                  uid = uid, pid = int(pid), aid = int(aid), aaid = int(aaid)).fetchall()
-    print ("whole list of rating: ", rating_list)
     friends_comment = [] #stores [firstname, lastname, comment, rating]
     for entry in rating_list:
         friend_name = g.conn.execute(text('SELECT firstname, lastname from users WHERE uid= :uid'), uid = int(entry[1])).fetchall()[0]
         friends_comment.append([friend_name[0], friend_name[1], entry[5], entry[6]])
     activity_category = g.conn.execute(text('select name from activitycategory where aid = :aid'), aid = int(aid)).fetchall()[0][0]
-    print ("friends_comment: ", friends_comment) 
-    print (" entry_by_location: ",  entry_by_location)
-    print ("activity_category: ", activity_category)
-    print ("avg rating: ", avg_rating)
     #handle no rating yet case
     if (avg_rating[0][0] == None):
         avg_rating = "no rating"
@@ -161,38 +154,27 @@ def rating_display(activity_subcategory, pid, aid, aaid):
     print ("most_fun_routes: ", most_fun_routes)
     #get all possible routes in route table
     all_routes = g.conn.execute("SELECT rid, name FROM route").fetchall()
-    print ("all_routes", all_routes)
     if request.method == 'POST':
         info = None
-        print ("******************I am in add_route_rating*********************")
         if request.method == 'POST':
             uid = session['uid']
-            print ("uid in rate_route", uid)
             max_rid = g.conn.execute("SELECT max(rid) FROM ratefunroute").fetchall()[0][0]
             rid = max_rid + 1
             pid = request.form['pid']
-            print ("pid in rate_route", pid)
             aid = request.form['aid']
-            print ("aid in rate_route", aid)
             aaid = request.form['aaid']
-            print ("aaid in rate_route", aaid)
             routeid = request.form['routeid']
-            print ("routeid in rate_route", routeid)
-            print ("routename in rate_route", request.form['routename'])
             activity_subcategory = g.conn.execute(text('select name from activity where aid = :aid and aaid = :aaid'), aid = aid, aaid = aaid).fetchall()[0][0]
             activity_subcategory = str(activity_subcategory)
             route_exists = g.conn.execute(text("SELECT * FROM modeoftransport WHERE route_number = :routeid AND \
                                      pid = :pid AND aid = :aid AND aaid = :aaid"), routeid = routeid, pid = pid, aid = aid, aaid = aaid).fetchall()
-            print ("route exists: ", route_exists)
             if len(route_exists) == 0:
                 g.conn.execute(text('INSERT INTO modeoftransport (route_number, pid, aid, aaid) VALUES (:routeid, :pid, :aid, :aaid)'),routeid = routeid, pid = pid, aid = aid, aaid = aaid)
             g.conn.execute(text('INSERT INTO ratefunroute (rid, uid, pid, aid, aaid, route_number, score) VALUES (:rid, :uid, :pid, :aid, :aaid, :routeid, 1)'),
                 rid = rid, uid = uid, pid = pid, aid = aid, aaid = aaid, routeid = routeid )
             info = "you just selected {} as the most fun route to this place".format(request.form['routename'])
-            print (info)
             #get all possible routes in route table
             all_routes = g.conn.execute("SELECT rid, name FROM route").fetchall()
-            print ("all_routes", all_routes)
             routes = g.conn.execute(text('select route.name from route join modeoftransport on route.rid = modeoftransport.route_number \
                 where pid=:pid and aid=:aid and aaid=:aaid;'), pid =int(pid), aid = int(aid), aaid =int(aaid)).fetchall()
             return render_template('show_ratings.html', 
@@ -228,15 +210,12 @@ def rating_display(activity_subcategory, pid, aid, aaid):
 #, activity_subcategory = activity_subcategory, pid = pid, start_time = mynames[3], end_time = mynames[4], budget = pid)
 @app.route('/loc_display/<name>')
 def loc_display(name):
-    print ("******************I am in loc_display *********************************")
     location_table_keys = ["pid", 'aid', 'aaid', 'open_time', 'close_time', 'state', 'city', 'name']
     res = g.conn.execute(text("select aid, aaid from activity where name=:name"),name = name).fetchall()
     aid = res[0][0]
     aaid = res[0][1]
     activity_category =  g.conn.execute(text("select name from activitycategory where aid=:aid"), aid = aid).fetchall()[0][0]
-    print ("activity_category", activity_category)
     entry_by_location = g.conn.execute(text('select * from location where aid = :aid and aaid = :aaid'), aid = aid, aaid = aaid).fetchall()
-    print (entry_by_location)
     if (session['logged_in']):
         log_info = " Logout"
     else:
@@ -254,12 +233,10 @@ def show_entries():
     else:
         log_info = " Login"
     print ("logged in : ",session['logged_in'])
-    print("****************************************I am in show_sentries*******************************************")
     return render_template('show_entriesv1.html', log_info = log_info)
 
 @app.route('/added_time/<aid>/<aaid>/<pid>', methods=['POST','GET'])
 def added_time(aid, aaid, pid):
-    print("****************************************I am in Added_Time*******************************************")
     startdatetime = str(request.form['startdatetime'])
     print ("startdatetime: ", startdatetime)
     enddatetime = str(request.form['enddatetime'])
@@ -285,26 +262,20 @@ def display_interest_list():
     if not session.get('logged_in'):
         abort(401)
     uid = session['uid']
-    print ("uid in interest: ", uid)
     entry_by_location1 = g.conn.execute(text('select name, state, city, open_time, close_time, start_time, end_time, budget, location.aid, location.aaid, location.pid from location INNER JOIN interest on (location.pid = interest.pid and location.aid = interest.activity_category and location.aaid = interest.activity_subcategory) where usr = :uid'), uid = uid).fetchall()
     entry_by_location = []
     newentry = []
     for entry in entry_by_location1:
         newentry = []
-        print (entry[8], entry[9], entry[10])
         ticket_info = g.conn.execute(text('SELECT name, price, tid FROM ticketrequired WHERE pid = :pid AND aid = :aid AND aaid = :aaid'), pid = int(entry[10]), aid = int(entry[8]), aaid = int(entry[9])).fetchall()
         if len(ticket_info) == 0:
             ticket_info = []
         else:
             ticket_info = ticket_info
-            print (ticket_info)
         for i in range (11):
             newentry.append(entry[i])
         newentry.append(ticket_info)
-        print ("new entry: ", newentry)
         entry_by_location.append(newentry)
-        print ("11: ", newentry[11])
-    print ("entry by location: ", entry_by_location)
     if len(entry_by_location) == 0:
         info = "you have nothing on your interest list yet!"
     return render_template('show_interest_list.html', 
@@ -317,7 +288,6 @@ def display_interest_list():
 @app.route('/add_comment/activity', methods=['POST','GET'])
 def add_comment():
     error = None
-    print ("******************I am in add_comment() *********************************")
     comment = request.form['comment']
     pid = int(request.form['pid'])
     aid = int(request.form['aid'])
@@ -326,13 +296,10 @@ def add_comment():
     activity_subcategory = str(activity_subcategory)
     latest_rid = int(g.conn.execute('select max(rid) from rate').fetchall()[0][0])
     rid = latest_rid+1
-    print ("latest_rid: ", latest_rid)
-    #print ("pid: %s, aid: %s, aaid: %s"%(pid, aid, aaid))
     print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
 
     uid = session['uid']
     score = request.form['rating']
-    print ("rating: ", score)
     if int(score) == -1 and len(comment) != 0:
         query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment)\
                 VALUES (:rid, :uid, :aid, :aaid, :pid, :comment)'
@@ -353,8 +320,6 @@ def add_comment():
                 VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'  
          g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score = score)  
          score = str(score) +'/5'
-    #new_comment = g.conn.execute(text('SELECT comment from rate WHERE rid = :rid'), rid = rid).fetchall()[0][0]
-    #print ("newly entered comment: ", new_comment)
     entry_by_location = g.conn.execute(text('select * from location where pid = :pid and aid = :aid and aaid = :aaid'), pid = int(pid), aid =int(aid), aaid = int(aaid)).fetchall()[0]
     activity_category =  g.conn.execute(text("select name from activitycategory where aid=:aid"), aid = aid).fetchall()[0][0]
     if (session['logged_in']):
@@ -374,26 +339,18 @@ def add_comment():
 @app.route("/rate_route", methods = ['GET', 'POST'])
 def rate_route():
     info = None
-    print ("******************I am in add_route_rating*********************")
     if request.method == 'POST':
         uid = session['uid']
-        print ("uid in rate_route", uid)
         max_rid = g.conn.execute("SELECT max(rid) FROM ratefunroute").fetchall()[0][0]
         rid = max_rid + 1
         pid = request.form['pid']
-        print ("pid in rate_route", pid)
         aid = request.form['aid']
-        print ("aid in rate_route", aid)
         aaid = request.form['aaid']
-        print ("aaid in rate_route", aaid)
         routeid = request.form['routeid']
-        print ("routeid in rate_route", routeid)
-        print ("routeid ", routeid)
         activity_subcategory = request.form['activity_subcategory']
         g.conn.execute(text('INSERT INTO ratefunroute (rid, uid, pid, aid, aaid, route_number, score) VALUES (:rid, :uid, :pid, :aid, :aaid, :routeid, 1)'),
                 rid = rid, uid = uid, pid = pid, aid = aid, aaid = aaid, routeid = routeid )
         info = "Hey you just selected {} as the most fun route to this place".format(request.form['routename'])
-        print (info)
         return redirect(url_for('rating_display(activity_subcategory, pid, aid, aaid)'))
 
 
@@ -402,15 +359,11 @@ def deletefrom_interestlist():
 	uid=session['uid']
 	activityID = request.args.get('query')
 	activityID = str(activityID)
-	print type(activityID)
 	words = activityID.split(" ")
-	print words
 	start_time_delete = words[3] + " " + words[4]
 	end_time_delete = words[5] + " " + words[6]
 	start_time_delete=start_time_delete[:-3]
 	end_time_delete=end_time_delete[:-3]
-	print start_time_delete
-	print end_time_delete
 	deleteentry = g.conn.execute(text("delete from interest where usr = :uid AND activity_category = :aid AND activity_subcategory = :aaid AND pid = :pid AND start_time = :start_time AND end_time = :end_time"), uid=int(uid), aid =int(words[0]), aaid= int(words[1]), pid=int(words[2]), start_time = datetime.datetime.strptime(start_time_delete,"%Y-%m-%d %H:%M"), end_time = datetime.datetime.strptime(end_time_delete,"%Y-%m-%d %H:%M"))
 	success = ["Successfully deleted this entry"]
 	return Response(json.dumps(success), mimetype='application/json')
@@ -420,18 +373,10 @@ def deletefrom_interestlist():
 
 @app.route('/find_activitygear')
 def find_activitygear():
-	activityID = request.args.get('query', 0, type=int)
-	print(activityID)
-	print("***********************I am in find_activitygear ***************")
+	activityID = request.args.get('query', 0, type = int)
 	getgear= g.conn.execute(text('select g.name,s.name,s.city from gears g INNER JOIN gearstocarry gc ON g.gid=gc.gid INNER JOIN travelitemshop ts ON gc.gid=ts.gear INNER JOIN shops s ON s.sid=ts.sid where gc.aid=:activityID'), activityID = activityID).fetchall()
-	print getgear
-	print getgear[0][0]
 	x=[[] for i in range(len(getgear))]
-	print x
-	print x[0]
-	print x
 	for i in getgear:
-		print i[0]
 		for j in x:
 			if not j:
 				j.append(i[0])
@@ -439,86 +384,60 @@ def find_activitygear():
 				break
 			elif j[0] == i[0]:
 				j.append(i[1] + ", " + i[2])
-				break
-			
-	print x
+				break			
 	gearData = [ a for a in x if a!=[]]
-	print gearData
 	return Response(json.dumps(gearData), mimetype='application/json')
 
 
 @app.route('/find_activityfriends')
 def find_activityfriends():
-	print ("Good NEWS!!")
 	uid = session['uid']
 	activityID = request.args.get('query')
-	print type(activityID)
 	activityID = str(activityID)
-	print type(activityID)
 	words = activityID.split(" ")
-	print words
-	print (g.conn.execute('select * from interest'))
-	print("***********************I am in find_activityfriends ***************")
 	getfriends= g.conn.execute(text("select firstname, lastname FROM users u JOIN interest i ON u.uid = i.usr WHERE activity_category = :aid AND activity_subcategory = :aaid AND pid = :pid AND start_time::date = :start_time AND budget <= :budget + 10 AND budget >= :budget - 10 AND i.usr <> :uid"), aid = int(words[0]), aaid = int(words[1]), pid = int(words[2]), start_time = words[3], budget = words[5], uid = int(uid)).fetchall()
-	print getfriends
-	print(len(getfriends))
-	print "got nothing man"
 	l = []
 	if len(getfriends)!=0:
 		for i in getfriends:
 			l.append(str(i[0]) + " " + str(i[1]))
 	return Response(json.dumps(l), mimetype='application/json')
-  
-  
-  
+   
 
 @app.route('/show_order_history', methods = ['GET', 'POST'])
 def show_order_history(price = None):
     info = None
     noorderinfo = None
     uid = session['uid']
-    print ("in show_order_history, session uid is ", uid)
     if request.method == 'POST':
         price = request.form['price']
         fund = g.conn.execute(text('SELECT fund from users WHERE uid = :uid'), uid = uid).fetchall()[0][0]
-        print ("fund: ", fund)
         remain = float(fund) - float(price)
-        print ("remain: ", remain)
         if (remain > 0 ):
             tid = request.form['tid']
             info = "your successfully purchased the ticket, and your remaining budget is ${}".format(remain)
-            print (info)
             g.conn.execute(text('UPDATE users SET fund =:fund WHERE uid = :uid'), fund = remain, uid = uid) 
             #add entry in order history!
             max_oid = g.conn.execute(text('SELECT max(oid) FROM orderhistory')).fetchall()[0][0]
-            oid = max_oid+1
-            print ("max_oid: ", max_oid)
+            oid = max_oid + 1 
             cur_time = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
-            g.conn.execute(text('INSERT INTO orderhistory (oid, uid, tid, time) VALUES (:oid, :uid , :tid, :time)'), oid=oid, uid=uid, tid=tid, time =cur_time)
-            print (g.conn.execute(text('SELECT max(oid) FROM orderhistory')).fetchall()[0][0])
-            
+            g.conn.execute(text('INSERT INTO orderhistory (oid, uid, tid, time) VALUES (:oid, :uid , :tid, :time)'), oid=oid, uid=uid, tid=tid, time =cur_time)           
         else: 
             info = "Sorry, you have insuffient budget for this purchase! The budget you have is ${}".format(float(fund))
-            print (info)
         orderhistory = g.conn.execute(text('select l.name,  price, t.name, time FROM ticketrequired t JOIN\
                                location l ON t.pid = l.pid and t.aid = l.aid and t.aaid = l.aaid JOIN \
                                orderhistory o on t.tid = o.tid where o.uid= :uid; '), uid = uid).fetchall() 
-        print ("order history: ", orderhistory)
         if (len(orderhistory) == 0):
             info = info + " you don't have any order history yet"
         return render_template("order_history.html", info = info, orderhistory = orderhistory)
     else: 
         fund = g.conn.execute(text('SELECT fund from users WHERE uid = :uid'), uid = uid).fetchall()[0][0]
-        print ("in get fund : ", fund)
         if (fund == None):
             info = "you don't have any fund on this website"
         else: 
-            print (fund)
             info = "Your remaining budget is ${}\n".format(float(fund))
         orderhistory = g.conn.execute(text('select l.name,  price, t.name, time FROM ticketrequired t JOIN\
                                location l ON t.pid = l.pid and t.aid = l.aid and t.aaid = l.aaid JOIN \
                                orderhistory o on t.tid = o.tid where o.uid= :uid; '), uid = uid).fetchall() 
-        print ("order history: ", orderhistory)
         if (len(orderhistory) == 0):
             noorderinfo =  " you don't have any order history yet ;)"
         
@@ -530,12 +449,9 @@ def add_friends():
     info = None
     if request.method == 'POST':
         userid = session['uid']
-        print ("userid ", userid)
         friendid = int(request.form['uid'])
-        print ("friendid", friendid)
-        #check if they are already friends!!!!!!!!!!!!!
+        #check if they are already friends!
         friendship_exists =  g.conn.execute(text('SELECT * FROM friendship WHERE usr = :uid and friend = :friend'),  uid = userid, friend = friendid).fetchall()
-        print ("exist? " ,friendship_exists)
         if len(friendship_exists) != 0:
             error = "Sorry, looks like this person is already your friend"
             print (error)
@@ -543,7 +459,6 @@ def add_friends():
             max_fid = g.conn.execute("SELECT max(fid) FROM friendship").fetchall()[0][0]
             fid = max_fid+1
             g.conn.execute(text('INSERT INTO friendship (fid, usr, friend) VALUES (:fid, :uid, :friendid)'), fid = fid, uid = userid, friendid = friendid)
-            print (g.conn.execute('select max(fid) from friendship').fetchall())
             fullname = g.conn.execute(text("select firstname, lastname from users where uid = :uid"), uid = friendid ).fetchall()[0]
             info = "Successfully added {} {} to your friend list! ".format(fullname[0], fullname[1])
     return render_template('search_friends.html', info = info, error = error)
@@ -552,8 +467,6 @@ def add_friends():
 @app.route('/search_friends', methods=['POST', 'GET'])
 def search_friends():
     error = None
-    if not session.get('logged_in'):
-        abort(401)
     if request.method == 'POST':
         f_firstname = str(request.form['firstname'])
         f_lastname = str(request.form['lastname'])
@@ -586,25 +499,18 @@ def login():
         hashed_password = hashlib.md5(str(request.form['password'])).hexdigest()
         
         if len(username) == 0:
-            print ("username {}", username)
             error = 'Invalid username'
         else:
             #there is this user but the password does not match
             password = password[0][0]
             if hashed_password != password:
-                print ("hashed password: {}".format( hashed_password ))
-                print ("table password: {}".format(password))
-                print ("password {}", format(str(request.form['password'])))
                 error = 'Invalid password'
             else: #there is a user and matching password
                 username = username[0][0]
-                print ("username: {}", username)
-                print ("hashed password {}", hashed_password)
                 session['logged_in'] = True
                 #flash('You were logged in')
                 uid = g.conn.execute(text("select uid from users where username = :username"), username = username ).fetchall()[0][0]
                 session['uid'] = uid
-                print ("uni: {}".format(uid))
                 return redirect(url_for('show_entries'))
     return render_template('login.html', error = error)
 
@@ -620,28 +526,21 @@ def logout():
 def enter_user_info(): 
     error = None
     uid = session['uid']
-    print ("enter_user_info uid: ", uid)
     if request.method == 'POST':
         firstname = str(request.form['firstname']).capitalize()
         lastname = str(request.form['lastname']).capitalize()
         gender = str(request.form['gender'])
         age = str(request.form['age'])
         fund = str(request.form['fund'])
-        print (firstname, lastname, gender, age, fund)
         if len(firstname) == 0:
-            print ("please enter firstname")
             error = "please enter firstname"
         elif len(lastname) == 0:
-            print ("please enter firstname")
             error = "please enter lastname"
         elif len(age) == 0:
-            print ("please enter firstname")
             error = "please enter age"
         elif len(gender) == 0:
-            print ("please enter firstname")
             error = "please enter gender"
         elif len(fund) == 0:
-            print ("please enter fund")
             error = "please enter fund"
         else:
             g.conn.execute(text("UPDATE users SET firstname = :firstname, lastname = :lastname, gender = :gender, age = :age, fund = :fund WHERE uid = \
@@ -653,12 +552,10 @@ def enter_user_info():
     age1 = g.conn.execute(text("SELECT age from users WHERE uid = :uid"), uid = uid).fetchall()
     gender1 = g.conn.execute(text("SELECT gender from users WHERE uid = :uid"), uid = uid).fetchall()
     fund1 = g.conn.execute(text("SELECT fund from users WHERE uid = :uid"), uid = uid).fetchall()
-    print ("firstname", firstname1)
     if (firstname1[0][0] == None):
         firstname1 = "Jane"
     else:
         firstname1 = firstname1[0][0]
-        print ("firstname", firstname1)
     if (lastname1[0][0] == None ):
         lastname1 = "Doe"
     else:
@@ -688,9 +585,7 @@ def signup():
     error = None
     if request.method == 'POST':
         username = str(request.form['username'])
-        print ("username: {}".format(username))
         password = str(request.form['password'])
-        print ("password: {}".format(password))
         hashed_password = hashlib.md5(str(request.form['password'])).hexdigest()
         #see if the username is already registered 
         username_exists = g.conn.execute(text("select username from users where username = :username"), username = username).fetchall()
@@ -698,29 +593,13 @@ def signup():
             error = "username already exists, please be creative and come up with a new one ;)"
         else: #insert username and password into the users table 
             max_uid = g.conn.execute(text("select max(uid) from users")).fetchall()[0][0]
-            print ("max_uid {}".format(max_uid))
             g.conn.execute(text('INSERT INTO users(uid, username, password)\
                 VALUES (:uid, :username, :password)'), uid = max_uid+1, username = username, password = hashed_password)
-            print ( g.conn.execute(text("select max(uid) from users")).fetchall()[0][0])
             session['logged_in'] = True
-            session['uid'] = max_uid+1
-            print ("just sign up uni: {}".format(max_uid+1))
+            session['uid'] = max_uid + 1
             return redirect(url_for('enter_user_info'))
     return render_template('signup.html', error = error)
     
-
-'''
-with app.app_context():
-	init_db()
-	db=get_db()
-	db.execute('insert into activitycategory (aid,name) values (?, ?)', [1,"Hiking"])
-	db.execute('insert into activitycategory (aid,name) values (?, ?)', [2,"Sailing"])
-	db.execute('insert into activitycategory (aid,name) values (?, ?)', [3,"Fishing"])
-	db.execute('insert into activity (aid,aaid,name) values (?, ?, ?)', [1,11,"Old Mountain Smith"])
-	db.execute('insert into activity (aid,aaid,name) values (?, ?, ?)', [1,12,"Yosemite Sam Park"])
-	db.execute('insert into activity (aid,aaid,name) values (?, ?, ?)', [1,13,"Grand Canyons National Park"])
-	db.commit()
-'''
 if __name__ == "__main__":
   import click
 
@@ -730,10 +609,7 @@ if __name__ == "__main__":
   @click.argument('HOST', default = '0.0.0.0')
   @click.argument('PORT', default = 8080, type=int)
   def run(debug, threaded, host, port):
-
     HOST, PORT = host, port
     print ("running on %s:%d" % (HOST, PORT))
     app.run(host = HOST, port = PORT, debug = debug, threaded = threaded,  use_reloader = False)
-
-
   run()
