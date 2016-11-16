@@ -281,6 +281,7 @@ def added_time(aid, aaid, pid):
 
 @app.route('/interests')
 def display_interest_list():
+    info = None
     if not session.get('logged_in'):
         abort(401)
     uid = session['uid']
@@ -304,15 +305,18 @@ def display_interest_list():
         entry_by_location.append(newentry)
         print ("11: ", newentry[11])
     print ("entry by location: ", entry_by_location)
-    
+    if len(entry_by_location) == 0:
+        info = "you have nothing on your interest list yet!"
     return render_template('show_interest_list.html', 
                             mynames = entry_by_location, 
+                            info = info
   )
 
 
 
 @app.route('/add_comment/activity', methods=['POST','GET'])
 def add_comment():
+    error = None
     print ("******************I am in add_comment() *********************************")
     comment = request.form['comment']
     pid = int(request.form['pid'])
@@ -325,15 +329,32 @@ def add_comment():
     print ("latest_rid: ", latest_rid)
     #print ("pid: %s, aid: %s, aaid: %s"%(pid, aid, aaid))
     print ("comment: %s, pid: %s, aid: %s, aaid: %s"%(comment, pid, aid, aaid))
-    query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
-                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'
+
     uid = session['uid']
     score = request.form['rating']
     print ("rating: ", score)
-    g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score=score)
-    
-    new_comment = g.conn.execute(text('SELECT comment from rate WHERE rid = :rid'), rid = rid).fetchall()[0][0]
-    print ("newly entered comment: ", new_comment)
+    if int(score) == -1 and len(comment) != 0:
+        query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment)'
+        g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment)
+        score = str(score) +'/5'
+    elif int(score) == -1 and len(comment) == 0: 
+        comment = "Yo, you didn't enter any comment!"
+        score = "Yo, you didn't enter any score!"
+        error = "needs to enter at least a comment and/or rating in order to submit!"
+    elif len(comment) == 0 and int(score) != -1:
+        query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, score)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :score)'
+        g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, score = score)
+        score = str(score) +'/5'
+        comment = "Yo, you didn't enter any comment!"
+    elif len(comment) != 0 and int(score) != -1:
+         query = 'INSERT INTO rate (rid, usr, activity_category,activity_subcategory, pid, comment, score)\
+                VALUES (:rid, :uid, :aid, :aaid, :pid, :comment, :score)'  
+         g.conn.execute(text(query), rid = rid , uid = uid,  aid = aid, aaid = aaid, pid = pid, comment = comment, score = score)  
+         score = str(score) +'/5'
+    #new_comment = g.conn.execute(text('SELECT comment from rate WHERE rid = :rid'), rid = rid).fetchall()[0][0]
+    #print ("newly entered comment: ", new_comment)
     entry_by_location = g.conn.execute(text('select * from location where pid = :pid and aid = :aid and aaid = :aaid'), pid = int(pid), aid =int(aid), aaid = int(aaid)).fetchall()[0]
     activity_category =  g.conn.execute(text("select name from activitycategory where aid=:aid"), aid = aid).fetchall()[0][0]
     if (session['logged_in']):
@@ -344,9 +365,10 @@ def add_comment():
                             entry_by_location  = entry_by_location, 
                             activity_subcategory = activity_subcategory, 
                             activity_category = activity_category,
-                            new_comment = new_comment,
+                            new_comment = str(comment),
                             score = score,
-                            log_info = log_info)
+                            log_info = log_info,
+                            error = error)
 
 
 @app.route("/rate_route", methods = ['GET', 'POST'])
@@ -453,6 +475,7 @@ def find_activityfriends():
 @app.route('/show_order_history', methods = ['GET', 'POST'])
 def show_order_history(price = None):
     info = None
+    noorderinfo = None
     uid = session['uid']
     print ("in show_order_history, session uid is ", uid)
     if request.method == 'POST':
@@ -481,16 +504,25 @@ def show_order_history(price = None):
                                location l ON t.pid = l.pid and t.aid = l.aid and t.aaid = l.aaid JOIN \
                                orderhistory o on t.tid = o.tid where o.uid= :uid; '), uid = uid).fetchall() 
         print ("order history: ", orderhistory)
+        if (len(orderhistory) == 0):
+            info = info + " you don't have any order history yet"
         return render_template("order_history.html", info = info, orderhistory = orderhistory)
     else: 
         fund = g.conn.execute(text('SELECT fund from users WHERE uid = :uid'), uid = uid).fetchall()[0][0]
-        info = "Your remaining budget is ${}\n".format(float(fund))
+        print ("in get fund : ", fund)
+        if (fund == None):
+            info = "you don't have any fund on this website"
+        else: 
+            print (fund)
+            info = "Your remaining budget is ${}\n".format(float(fund))
         orderhistory = g.conn.execute(text('select l.name,  price, t.name, time FROM ticketrequired t JOIN\
                                location l ON t.pid = l.pid and t.aid = l.aid and t.aaid = l.aaid JOIN \
                                orderhistory o on t.tid = o.tid where o.uid= :uid; '), uid = uid).fetchall() 
         print ("order history: ", orderhistory)
+        if (len(orderhistory) == 0):
+            noorderinfo =  " you don't have any order history yet ;)"
         
-        return render_template("order_history.html", info = info, orderhistory = orderhistory)
+        return render_template("order_history.html", info = info, noorderinfo = noorderinfo, orderhistory = orderhistory)
 
 @app.route('/add_friends', methods = ['POST', 'GET'])
 def add_friends(): 
@@ -514,7 +546,7 @@ def add_friends():
             print (g.conn.execute('select max(fid) from friendship').fetchall())
             fullname = g.conn.execute(text("select firstname, lastname from users where uid = :uid"), uid = friendid ).fetchall()[0]
             info = "Successfully added {} {} to your friend list! ".format(fullname[0], fullname[1])
-    return render_template('search_friends.html', info = info)
+    return render_template('search_friends.html', info = info, error = error)
 
 
 @app.route('/search_friends', methods=['POST', 'GET'])
@@ -531,10 +563,13 @@ def search_friends():
         else:
             f_firstname = f_firstname.capitalize()
             f_lastname = f_lastname.capitalize()
+            print ("firstname: ", f_firstname)
+            print ("lastname: ", f_lastname)
             fullnames = g.conn.execute(text('SELECT firstname, lastname, gender, age, uid FROM users WHERE firstname = :firstname and lastname = :lastname'), firstname = f_firstname, lastname = f_lastname).fetchall()
-            print (fullnames)
+            print ("in serach friends: ", fullnames)
             if len(fullnames) == 0:
                 error = "Sorry, {} {} is not registered on Doodle Meet yet!".format(f_firstname, f_lastname)
+                print ("in serach friends: ", fullnames)
             else:
                 fullnames = fullnames
                 print (fullnames)

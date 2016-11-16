@@ -169,6 +169,7 @@
     </ul>
   </div>
 </nav>
+ {% if info %}<p class=error><strong>Hey</strong> {{ info }}{% endif %}
 {% set a = 0 %}
 <ul class="list-group">
     {% for entry in mynames %}
