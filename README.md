@@ -1,12 +1,5 @@
 # DoodleMeet
-Changes since the part 2:
-```
-1. drop NOT NULL constraints on score in the interest table. We allow user to don't enter score on an activity 
-2. add username (unique) and password to the user table.
-3*.best using Chrome! Safari won't display the calendar dropdown. 
-```
-
-For TAs to test, use the following user login credentials: 
+For testing, use the following user login credentials: 
 ```
 username: yh2901  
 password: emily  
